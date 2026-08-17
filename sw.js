@@ -1,5 +1,5 @@
 // Service Worker - Seguimiento Docente Prof. Eckerdt Mariano
-const CACHE_NAME = 'prof-eckerdt-v2.0.2';
+const CACHE_NAME = 'prof-eckerdt-v2.0.3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -27,7 +27,6 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(response => {
       if (response) return response;
       return fetch(event.request).catch(() => {
-        // Si falla el fetch y es una navegación, devolver index.html
         if (event.request.mode === 'navigate') {
           return caches.match('/index.html');
         }
