@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sistema de Seguimiento Docente</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --accent: #2563eb;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0284c7;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --card-bg: #152238;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --accent: #60a5fa;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 60px; transition: background 0.3s, color 0.3s; }
+
+    header { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 12px 20px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .brand-title { font-size: 1.25rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    nav.top-nav { background: var(--card-bg); border-bottom: 2px solid var(--border); }
+    .top-nav-inner { max-width: 1200px; margin: 0 auto; display: flex; overflow-x: auto; }
+    .nav-tab-btn { flex: 1; min-width: 140px; padding: 14px 10px; background: none; border: none; color: var(--text-muted); font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: center; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+    .nav-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: rgba(37,99,235,0.05); }
+
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .card-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; gap: 10px; flex-wrap: wrap; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 15px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; }
+    .form-control:focus { outline: none; border-color: var(--accent); }
+
+    .btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success { background: var(--success); }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-danger { background: var(--danger); }
+    .btn-info { background: var(--info); }
+    .btn-lg { padding: 14px 24px; font-size: 1rem; border-radius: var(--radius); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn-block { width: 100%; }
+
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+    .badge-success { background: var(--success); color: white; }
+    .badge-warning { background: var(--warning); color: black; }
+    .badge-danger { background: var(--danger); color: white; }
+    .badge-info { background: var(--info); color: white; }
+    .badge-secondary { background: var(--border); color: var(--text-muted); }
+
+    .pct { font-weight: 800; white-space: nowrap; }
+    .pct-green  { color: #16a34a; }
+    .pct-yellow { color: #ca8a04; }
+    .pct-orange { color: #ea580c; }
+    .pct-red    { color: #dc2626; }
+    [data-theme="dark"] .pct-green  { color: #4ade80; }
+    [data-theme="dark"] .pct-yellow { color: #facc15; }
+    [data-theme="dark"] .pct-orange { color: #fb923c; }
+    [data-theme="dark"] .pct-red    { color: #f87171; }
+    .cond-badge { cursor: pointer; border: none; font-family: inherit; }
+
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { background: var(--bg); color: var(--text-muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    tr:hover { background: rgba(0,0,0,0.02); }
+
+    .course-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 15px; }
+    .course-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: var(--radius); padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+    .course-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .course-card.active { border-color: var(--primary); background: rgba(30,58,138,0.03); }
+    .course-card-actions { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 8px; }
+    .course-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+    .course-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .course-subnav { display: flex; gap: 6px; background: var(--bg); padding: 6px; border-radius: var(--radius-sm); margin-bottom: 20px; overflow-x: auto; }
+    .course-subnav-btn { flex: 1; min-width: 100px; padding: 10px 8px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 0.85rem; border-radius: 6px; cursor: pointer; text-align: center; white-space: nowrap; }
+    .course-subnav-btn.active { background: var(--card-bg); color: var(--primary); box-shadow: var(--shadow); }
+
+    .trim-tabs { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; }
+    .trim-tab { flex: 1; min-width: 100px; padding: 10px 8px; border: 2px solid var(--border); background: var(--bg); color: var(--text-muted); font-weight: 800; font-size: 0.85rem; border-radius: var(--radius-sm); cursor: pointer; }
+    .trim-tab.active { border-color: var(--primary); color: var(--primary); background: var(--card-bg); }
+
+    .attendance-btn-group { display: flex; gap: 6px; }
+    .att-btn { flex: 1; min-width: 40px; padding: 10px 4px; border: 2px solid var(--border); border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-align: center; transition: all 0.15s; background: var(--card-bg); color: var(--text-muted); }
+    .att-btn.att-p.active { background: var(--success); color: white; border-color: var(--success); }
+    .att-btn.att-a.active { background: var(--danger); color: white; border-color: var(--danger); }
+    .att-btn.att-t.active { background: var(--warning); color: black; border-color: var(--warning); }
+    .att-btn.att-r.active { background: var(--info); color: white; border-color: var(--info); }
+    .att-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .att-col { min-width: 230px; }
+
+    .nota-input { width: 68px; padding: 7px 4px; text-align: center; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); }
+    .nota-input:focus { outline: none; border-color: var(--accent); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 15px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal { background: var(--card-bg); border-radius: var(--radius); width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+    .modal.wide { max-width: 850px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; gap: 10px; }
+    .modal-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+
+    .hidden { display: none !important; }
+    .sync-bar { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+
+    .clickable { cursor: pointer; color: var(--accent); text-decoration: underline; }
+    .day-sched-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .day-sched-row label { min-width: 90px; font-weight: 700; font-size: 0.9rem; color: var(--text); }
+    .info-banner { padding: 12px; border-radius: var(--radius-sm); margin-bottom: 15px; font-size: 0.9rem; font-weight: 600; }
+    .info-banner.warn { background: var(--warning); color: #000; }
+    .info-banner.info { background: var(--info); color: #fff; }
+    .ficha-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 10px; margin-bottom: 15px; }
+    .ficha-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; }
+    .ficha-item .lbl { font-size: 0.75rem; color:var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .ficha-item .val { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+    .obs-item { padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .btn-group-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .brand-title { font-size: 1rem; }
+      .card { padding: 14px; }
+      .card-title { font-size: 1rem; }
+      .nav-tab-btn { min-width: 112px; font-size: 0.8rem; padding: 12px 6px; }
+      .course-subnav-btn { min-width: 88px; font-size: 0.78rem; padding: 9px 5px; }
+      .att-col { min-width: 210px; }
+      .header-inner { gap: 8px; }
+    }
+    @media (max-width: 480px) {
+      .container { padding: 0 10px; margin: 12px auto; }
+      .form-grid { grid-template-columns: 1fr; }
+      .attendance-btn-group { flex-wrap: wrap; }
+      .att-btn { min-width: 46px; }
+      .btn-lg { width: 100%; }
+      .modal { padding: 16px; max-height: 95vh; }
+      th, td { padding: 8px 9px; font-size: 0.82rem; }
+      .trim-tab { min-width: 88px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand-title">
+        <span>👨‍🏫 Sistema de Seguimiento Docente</span>
+        <span class="sync-bar" id="syncStatusTag"><span class="sync-dot"></span> <span id="syncText">Local / Offline</span></span>
+      </div>
+      <div class="header-actions">
+        <span style="font-size:0.85rem; font-weight:700;">📅 Año:</span>
+        <select id="globalYearSelect" class="form-control" style="width: auto; padding: 4px 10px;" onchange="changeGlobalYear(this.value)"></select>
+        <button class="btn btn-secondary btn-sm" onclick="toggleTheme()" id="themeToggleBtn">☀️ Modo Claro</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="nav-tab-btn active" data-tab="cursos" onclick="switchNavTab('cursos', this)">📚 CURSOS</button>
+      <button class="nav-tab-btn" data-tab="config" onclick="switchNavTab('config', this)">⚙️ CONFIGURACIÓN</button>
+      <button class="nav-tab-btn" data-tab="admin" onclick="switchNavTab('admin', this)">🛠️ ADMINISTRACIÓN</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <div id="tab-cursos" class="main-tab-content">
+
+      <div class="card" style="margin-bottom: 15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3 style="font-size:1.1rem; color:var(--primary);" id="docenteHeaderName">Docente: Sin Configurar</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted);" id="docenteHeaderMeta">Escuela / Materia / Localidad</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="switchNavTab('admin')">✏️ Editar Perfil Docente</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>Seleccionar Curso Activo</span>
+          <button class="btn btn-sm btn-success" onclick="switchNavTab('config')">+ Crear Nuevo Curso</button>
+        </div>
+        <div class="course-cards-grid" id="coursesGridContainer"></div>
+      </div>
+
+      <div id="activeCourseDetailPanel" class="hidden">
+
+        <div class="card" style="background: var(--bg); border-left: 5px solid var(--primary);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h2 style="font-size:1.3rem; color:var(--primary);" id="activeCourseTitle">Curso: -</h2>
+              <p style="font-size:0.85rem; color:var(--text-muted);" id="activeCourseMeta">Turno / Materia / Días y Horarios</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <span class="badge badge-info" id="activeCourseStudentCount">0 Estudiantes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-subnav">
+          <button class="course-subnav-btn active" data-sub="estudiantes" onclick="switchCourseSubtab('estudiantes', this)">👥 ESTUDIANTES</button>
+          <button class="course-subnav-btn" data-sub="notas" onclick="switchCourseSubtab('notas', this)">🎓 NOTAS</button>
+          <button class="course-subnav-btn" data-sub="asistencia" onclick="switchCourseSubtab('asistencia', this)">📝 ASISTENCIA</button>
+          <button class="course-subnav-btn" data-sub="resumen" onclick="switchCourseSubtab('resumen', this)">📋 RESUMEN</button>
+          <button class="course-subnav-btn" data-sub="calendario" onclick="switchCourseSubtab('calendario', this)">📅 CALENDARIO</button>
+          <button class="course-subnav-btn" data-sub="observaciones" onclick="switchCourseSubtab('observaciones', this)">💬 OBSERVACIONES</button>
+          <button class="course-subnav-btn" data-sub="estadisticas" onclick="switchCourseSubtab('estadisticas', this)">📊 ESTADÍSTICAS</button>
+        </div>
+
+        <div id="subtab-estudiantes" class="course-subtab-view">
+          <div class="card">
+            <div class="card-title">
+              <span>Nómina de Estudiantes</span>
+              <div class="btn-group-wrap">
+                <button class="btn btn-sm" onclick="openModal('modalAddStudent')">+ Alta Individual</button>
+                <button class="btn btn-sm btn-secondary" onclick="openBulkModal()">📋 Carga Masiva</button>
+                <button class="btn btn-sm btn-secondary" onclick="document.getElementById('bulkCsvFileInput').click()">📥 Importar CSV</button>
+                <input type="file" id="bulkCsvFileInput" accept=".csv,.txt" style="display:none;" onchange="importCsvFile(event)">
+                <button class="btn btn-sm btn-info" onclick="openMovementsModal()">📜 Historial Altas/Bajas</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Condición</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="studentTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-notas" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">
+              <span>Notas y Evaluaciones</span>
+              <button class="btn btn-sm btn-success" onclick="openModal('modalNewEval')">+ Nueva Evaluación</button>
+            </div>
+            <div class="trim-tabs" id="notasTrimTabs">
+              <button class="trim-tab" data-trim="1" onclick="setNotasTrim(1)">1er Trimestre</button>
+              <button class="trim-tab" data-trim="2" onclick="setNotasTrim(2)">2do Trimestre</button>
+              <button class="trim-tab" data-trim="3" onclick="setNotasTrim(3)">3er Trimestre</button>
+            </div>
+            <div id="notasTableContainer"></div>
+          </div>
+        </div>
+
+        <div id="subtab-asistencia" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">
+              <span>Toma de Asistencia Diaria</span>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <label style="font-size:0.85rem; font-weight:bold;">Fecha:</label>
+                <input type="date" id="attendanceDateInput" class="form-control" style="width:auto;" onchange="renderAttendanceSheet()">
+              </div>
+            </div>
+
+            <div id="noClassDayAlert" class="info-banner warn hidden">
+              ⚠️ <span id="noClassAlertTitle">DÍA SIN ACTIVIDAD</span>: <span id="noClassReason">Feriado</span>. No corresponde toma de asistencia. El registro está bloqueado.
+            </div>
+            <div id="notClassDayInfo" class="info-banner info hidden">
+              ℹ️ Esta fecha no corresponde a un día de cursado habitual del curso (posible clase de recuperación).
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Estudiante</th>
+                    <th class="att-col" style="text-align:center;">Estado de Asistencia</th>
+                    <th>Observación del Día</th>
+                  </tr>
+                </thead>
+                <tbody id="attendanceTableBody"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:15px; display:flex; justify-content:flex-end;">
+              <button class="btn btn-success btn-lg" id="saveAttBtn" onclick="saveAttendanceRecord()">💾 Guardar Asistencia</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Asistencia por Trimestre</div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+              % = asistencias del estudiante ÷ clases computables del trimestre × 100. Se actualiza automáticamente al cargar, modificar o eliminar asistencias, o al marcar días sin actividad.
+            </p>
+            <div class="trim-tabs" id="attTrimTabs">
+              <button class="trim-tab" data-trim="1" onclick="setAttTrim(1)">1er Trimestre</button>
+              <button class="trim-tab" data-trim="2" onclick="setAttTrim(2)">2do Trimestre</button>
+              <button class="trim-tab" data-trim="3" onclick="setAttTrim(3)">3er Trimestre</button>
+            </div>
+            <div id="attTrimContainer"></div>
+          </div>
+        </div>
+
+        <div id="subtab-resumen" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Resumen Académico — Notas y Asistencia por Trimestre</div>
+            <div class="trim-tabs" id="resumenTrimTabs">
+              <button class="trim-tab" data-trim="1" onclick="setResumenTrim(1)">1er Trimestre</button>
+              <button class="trim-tab" data-trim="2" onclick="setResumenTrim(2)">2do Trimestre</button>
+              <button class="trim-tab" data-trim="3" onclick="setResumenTrim(3)">3er Trimestre</button>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Estudiante</th>
+                    <th>Condición de Cursado</th>
+                    <th>Promedio del Trimestre</th>
+                    <th>Asistencia del Trimestre</th>
+                  </tr>
+                </thead>
+                <tbody id="resumenTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-calendario" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Calendario de Clases y Días Sin Actividad</div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Clases generadas automáticamente según días de cursado y calendario académico (trimestres) configurados. Las excepciones se marcan automáticamente.</p>
+            <div id="calendarHint" class="info-banner info hidden">⚙️ Configurá las fechas de los trimestres en "Configuración de Cursos" para generar automáticamente el calendario de clases.</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Día</th>
+                    <th>Tipo / Estado</th>
+                    <th>Descripción / Observación</th>
+                  </tr>
+                </thead>
+                <tbody id="calendarTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-observaciones" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Observaciones Pedagógicas y de Convivencia</div>
+            <div class="form-grid" style="margin-bottom:15px;">
+              <div class="form-group">
+                <label>Estudiante (Opcional - vacío para todo el curso):</label>
+                <select id="obsStudentSelect" class="form-control"></select>
+              </div>
+              <div class="form-group">
+                <label>Fecha:</label>
+                <input type="date" id="obsDateInput" class="form-control">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Detalle de la Observación:</label>
+                <input type="text" id="obsTextInput" class="form-control" placeholder="Ej: Se trabajó números racionales. Presentó tarea completa.">
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="addPedagogicalObservation()">+ Registrar Observación</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Historial de Observaciones</div>
+            <div id="observationsListContainer"></div>
+          </div>
+        </div>
+
+        <div id="subtab-estadisticas" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Estadísticas y Resumen de Asistencia</div>
+            <div class="form-grid" style="margin-bottom:15px;">
+              <div class="card" style="text-align:center; background:var(--bg); margin-bottom:0;">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--primary);" id="statScheduledClasses">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Clases Programadas</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg); margin-bottom:0;">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--success);" id="statHeldClasses">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Clases Realizadas</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg); margin-bottom:0;">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--warning);" id="statNoClassDays">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Días Sin Actividad</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg); margin-bottom:0;">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--danger);" id="statTeacherAbs">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Ausencias Docente</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg); margin-bottom:0;">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--info);" id="statAvgAttendance">0%</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">% Asistencia Promedio (P y T cuentan como presente)</div>
+              </div>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;" id="statDetailText"></p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Asistencia Individual por Estudiante</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Estudiante</th>
+                    <th>Presentes</th>
+                    <th>Tardes</th>
+                    <th>Ausentes</th>
+                    <th>Retiros</th>
+                    <th>% Asistencia</th>
+                  </tr>
+                </thead>
+                <tbody id="statStudentTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="tab-config" class="main-tab-content hidden">
+
+      <div class="card">
+        <div class="card-title">Creación / Edición de Cursos</div>
+        <form id="courseConfigForm" onsubmit="handleSaveCourse(event)">
+          <input type="hidden" id="cfgCourseId">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Año (Ej: 1°, 2°, 3°)</label>
+              <input type="text" id="cfgYear" class="form-control" required placeholder="Ej: 3°">
+            </div>
+            <div class="form-group">
+              <label>División (Ej: A, B, 1°)</label>
+              <input type="text" id="cfgDivision" class="form-control" required placeholder="Ej: B">
+            </div>
+            <div class="form-group">
+              <label>Turno</label>
+              <select id="cfgTurno" class="form-control">
+                <option value="Mañana">Mañana</option>
+                <option value="Tarde">Tarde</option>
+                <option value="Noche">Noche</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Materia</label>
+              <input type="text" id="cfgMateria" class="form-control" required placeholder="Ej: Matemática">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Días de Cursado:</label>
+              <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:5px;" id="cfgDaysContainer">
+                <label><input type="checkbox" name="cfgDays" value="1" onchange="renderDayScheduleInputs()"> Lunes</label>
+                <label><input type="checkbox" name="cfgDays" value="2" onchange="renderDayScheduleInputs()"> Martes</label>
+                <label><input type="checkbox" name="cfgDays" value="3" onchange="renderDayScheduleInputs()"> Miércoles</label>
+                <label><input type="checkbox" name="cfgDays" value="4" onchange="renderDayScheduleInputs()"> Jueves</label>
+                <label><input type="checkbox" name="cfgDays" value="5" onchange="renderDayScheduleInputs()"> Viernes</label>
+                <label><input type="checkbox" name="cfgDays" value="6" onchange="renderDayScheduleInputs()"> Sábado</label>
+              </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Horarios por día (formato HH:MM - HH:MM; se puede indicar más de una franja separada por coma):</label>
+              <div id="daySchedulesContainer" style="margin-top:8px;"></div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+            <button type="submit" class="btn btn-success">💾 Guardar Curso</button>
+            <button type="button" class="btn btn-secondary" onclick="resetCourseForm()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Calendario Académico — Trimestres <span class="badge badge-info" id="trimYearBadge"></span></div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Sin fechas predeterminadas: configurá el rango de cada trimestre para el año lectivo seleccionado. Estas fechas alimentan la generación automática del calendario de clases.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>1er Trimestre - Desde:</label>
+            <input type="date" id="trim1Start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>1er Trimestre - Hasta:</label>
+            <input type="date" id="trim1End" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>2do Trimestre - Desde:</label>
+            <input type="date" id="trim2Start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>2do Trimestre - Hasta:</label>
+            <input type="date" id="trim2End" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>3er Trimestre - Desde:</label>
+            <input type="date" id="trim3Start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>3er Trimestre - Hasta:</label>
+            <input type="date" id="trim3End" class="form-control">
+          </div>
+        </div>
+        <button class="btn btn-success" style="margin-top:10px;" onclick="saveTrimesterConfig()">💾 Guardar Trimestres</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Días Sin Actividad (Feriados, Paros, Jornadas, Ausencias Docente)</div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Se diferencia automáticamente entre <strong>Día sin actividad</strong> (no se dicta clase) y <strong>Ausencia del docente</strong> (debía dictar y no asistió). Esto alimenta las estadísticas.</p>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label>Fecha:</label>
+            <input type="date" id="noActDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Motivo / Excepción:</label>
+            <select id="noActReason" class="form-control">
+              <option value="Feriado">Feriado</option>
+              <option value="Asueto">Asueto</option>
+              <option value="Día Institucional">Día Institucional</option>
+              <option value="Inclemencia Climática">Inclemencia Climática</option>
+              <option value="Paro Docente">Paro Docente</option>
+              <option value="Ausencia Docente">Ausencia Docente (el docente no asistió)</option>
+              <option value="Ausente por Aviso">Ausente por Aviso</option>
+              <option value="Suspensión de Actividades">Suspensión de Actividades</option>
+              <option value="Problemas Edilicios">Problemas Edilicios</option>
+              <option value="Actividad Institucional">Actividad Institucional</option>
+              <option value="Jornada Institucional">Jornada Institucional</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Observación / Detalle:</label>
+            <input type="text" id="noActNote" class="form-control" placeholder="Ej: Suspensión por inclemencias climáticas">
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="addNoActivityDay()">+ Agregar Día Sin Actividad</button>
+        <div class="table-responsive" style="margin-top:15px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Motivo</th>
+                <th>Observación</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="noActivityTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="tab-admin" class="main-tab-content hidden">
+
+      <div class="card">
+        <div class="card-title">Perfil del Docente & Datos Institucionales</div>
+        <form onsubmit="handleSaveTeacherProfile(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input type="text" id="docName" class="form-control" required placeholder="Ej: Mariano">
+            </div>
+            <div class="form-group">
+              <label>Apellido:</label>
+              <input type="text" id="docLastName" class="form-control" required placeholder="Ej: Eckerdt">
+            </div>
+            <div class="form-group">
+              <label>DNI:</label>
+              <input type="text" id="docDni" class="form-control" placeholder="Ej: 30123456">
+            </div>
+            <div class="form-group">
+              <label>Título / Cargo:</label>
+              <input type="text" id="docTitle" class="form-control" placeholder="Ej: Profesor de Educación Secundaria">
+            </div>
+            <div class="form-group">
+              <label>Espacio Curricular / Materia:</label>
+              <input type="text" id="docSubject" class="form-control" placeholder="Ej: Matemática">
+            </div>
+            <div class="form-group">
+              <label>Institución Educativa:</label>
+              <input type="text" id="docSchool" class="form-control" placeholder="Ej: Escuela Secundaria N° 1">
+            </div>
+            <div class="form-group">
+              <label>Número de Escuela:</label>
+              <input type="text" id="docSchoolNum" class="form-control" placeholder="Ej: 101">
+            </div>
+            <div class="form-group">
+              <label>Localidad:</label>
+              <input type="text" id="docLocality" class="form-control" placeholder="Ej: Paraná">
+            </div>
+            <div class="form-group">
+              <label>Departamento:</label>
+              <input type="text" id="docDept" class="form-control" placeholder="Ej: Paraná">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success" style="margin-top:10px;">💾 Guardar Perfil Docente</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Gestión de Años Lectivos</div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+          Cada año lectivo mantiene sus propios cursos, nóminas, asistencias y calendarios aislados.
+        </p>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:15px;">
+          <button class="btn btn-primary" onclick="copyPreviousYearConfig()">🔄 Copiar Configuración del Año Anterior</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Exportar Datos (Excel / CSV)</div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
+          Exportá la información del año lectivo activo para abrir en Excel o Google Sheets.
+        </p>
+        <div class="btn-group-wrap">
+          <button class="btn btn-info" onclick="exportStudentsCSV()">📊 Exportar Estudiantes (CSV)</button>
+          <button class="btn btn-info" onclick="exportAttendanceCSV()">📝 Exportar Asistencia (CSV)</button>
+          <button class="btn btn-info" onclick="exportNotasCSV()">🎓 Exportar Notas (CSV)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Copias de Seguridad (Backup completo JSON)</div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
+          Exportá todos tus datos en un archivo JSON descargable o restaurá desde una copia previa.
+        </p>
+        <div class="btn-group-wrap">
+          <button class="btn btn-success btn-lg" onclick="exportFullBackupJSON()">📥 Exportar Copia de Seguridad (.json)</button>
+          <label class="btn btn-secondary btn-lg" style="cursor:pointer;">
+            📤 Restaurar Copia de Seguridad
+            <input type="file" id="importBackupFileInput" accept=".json" style="display:none;" onchange="importFullBackupJSON(event)">
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="modalAddStudent">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">+ Alta Individual de Estudiante</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalAddStudent')">✖ Cerrar</button>
+      </div>
+      <form onsubmit="saveNewStudent(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Apellido:</label>
+            <input type="text" id="nsLastName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="nsFirstName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>DNI:</label>
+            <input type="text" id="nsDni" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Fecha de Nacimiento (opcional):</label>
+            <input type="date" id="nsBirthDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Fecha de Ingreso:</label>
+            <input type="date" id="nsEntryDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Motivo de Ingreso:</label>
+            <input type="text" id="nsEntryReason" class="form-control" placeholder="Ej: Ingreso nuevo / Pase de otro curso">
+          </div>
+        </div>
+        <div class="btn-group-wrap" style="margin-top:10px;">
+          <button type="submit" class="btn btn-success">💾 Guardar Estudiante</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalAddStudent')">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalBulkStudent">
+    <div class="modal wide">
+      <div class="modal-header">
+        <span class="modal-title">📋 Carga Masiva de Estudiantes</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalBulkStudent')">✖ Cerrar</button>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+        Pegá una lista con columnas <strong>Apellido | Nombre | DNI</strong> (también acepta coma, punto y coma o tabulación, y detecta encabezados automáticamente). También podés importar un archivo CSV.
+      </p>
+      <textarea id="bulkTextInput" class="form-control" rows="6" placeholder="Pérez | Juan | 40123456&#10;Gómez | María | 40987654"></textarea>
+      <div class="btn-group-wrap" style="margin-top:10px; margin-bottom:15px;">
+        <button class="btn" onclick="renderBulkPreview()">🔍 Vista Previa</button>
+        <label class="btn btn-secondary" style="cursor:pointer;">
+          📥 Cargar desde archivo
+          <input type="file" accept=".csv,.txt" style="display:none;" onchange="importCsvFile(event, true)">
+        </label>
+      </div>
+      <div id="bulkPreviewContainer"></div>
+      <div class="btn-group-wrap" style="margin-top:15px;">
+        <button class="btn btn-success btn-lg hidden" id="bulkImportBtn" onclick="importBulkStudents()">✅ Importar Estudiantes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalStudentFile">
+    <div class="modal wide">
+      <div class="modal-header">
+        <span class="modal-title">👤 Ficha Individual del Estudiante</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalStudentFile')">✖ Cerrar</button>
+      </div>
+      <div id="studentFileContent"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalMovements">
+    <div class="modal wide">
+      <div class="modal-header">
+        <span class="modal-title">📜 Historial de Altas y Bajas</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalMovements')">✖ Cerrar</button>
+      </div>
+      <div id="movementsListContainer"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalNewEval">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">+ Nueva Evaluación</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modalNewEval')">✖ Cerrar</button>
+      </div>
+      <form onsubmit="saveEvaluacion(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Fecha:</label>
+            <input type="date" id="evDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Nombre / Concepto:</label>
+            <input type="text" id="evName" class="form-control" required placeholder="Ej: Examen unidad 1">
+          </div>
+          <div class="form-group">
+            <label>Tipo:</label>
+            <select id="evType" class="form-control">
+              <option value="Escrita">Escrita</option>
+              <option value="Oral">Oral</option>
+              <option value="Práctica">Práctica</option>
+              <option value="Trabajo">Trabajo</option>
+              <option value="Exposición">Exposición</option>
+              <option value="Otra">Otra</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-group-wrap" style="margin-top:10px;">
+          <button type="submit" class="btn btn-success">💾 Crear Evaluación</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalNewEval')">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       SISTEMA DE SEGUIMIENTO DOCENTE
+       ============================================================ */
+
+    var DAYS_FULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    var TEACHER_ABSENCE = 'Ausencia Docente';
+
+    /* ---------- Base de datos (localStorage) ---------- */
+
+    function migrateTrimesters(raw) {
+      if (!raw) return {};
+      if (raw.t1Start !== undefined) {
+        var y = parseInt(localStorage.getItem('ssd_globalYear')) || 2026;
+        var obj = {};
+        obj[y] = {
+          t1Start: raw.t1Start, t1End: raw.t1End,
+          t2Start: raw.t2Start, t2End: raw.t2End,
+          t3Start: raw.t3Start, t3End: raw.t3End
+        };
+        return obj;
+      }
+      return raw;
+    }
+
+    var db = {
+      version: 3,
+      theme: localStorage.getItem('ssd_theme') || 'light',
+      globalYear: parseInt(localStorage.getItem('ssd_globalYear')) || 2026,
+      teacher: JSON.parse(localStorage.getItem('ssd_teacher')) || {
+        name: '', lastName: '', dni: '', title: '',
+        subject: '', school: '', schoolNum: '', locality: '', dept: ''
+      },
+      courses: JSON.parse(localStorage.getItem('ssd_courses')) || [],
+      trimesters: migrateTrimesters(JSON.parse(localStorage.getItem('ssd_trimesters'))),
+      noActivityDays: JSON.parse(localStorage.getItem('ssd_noActivityDays')) || [],
+      attendanceRecords: JSON.parse(localStorage.getItem('ssd_attendanceRecords')) || {},
+      observations: JSON.parse(localStorage.getItem('ssd_observations')) || [],
+      movements: JSON.parse(localStorage.getItem('ssd_movements')) || [],
+      evaluaciones: JSON.parse(localStorage.getItem('ssd_evaluaciones')) || {},
+      notas: JSON.parse(localStorage.getItem('ssd_notas')) || {}
+    };
+
+    var selectedCourseId = null;
+    var bulkParsed = [];
+    var notasTrim = 1;
+    var resumenTrim = 1;
+    var attTrim = 1;
+
+    /* ---------- Utilidades ---------- */
+
+    function uid() { return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function todayISO() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+    function esc(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function saveDb(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function getCourse() {
+      for (var i = 0; i < db.courses.length; i++) {
+        if (db.courses[i].id === selectedCourseId) return db.courses[i];
+      }
+      return null;
+    }
+    function getTrimesters(year) {
+      if (!db.trimesters[year]) {
+        db.trimesters[year] = { t1Start: '', t1End: '', t2Start: '', t2End: '', t3Start: '', t3End: '' };
+      }
+      return db.trimesters[year];
+    }
+    function fmtDate(iso) {
+      if (!iso) return '-';
+      var p = iso.split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+    }
+
+    /* ---------- Colores de asistencia (rangos exactos) ---------- */
+
+    function attPctMeta(pct) {
+      if (pct === null || pct === undefined || isNaN(pct)) {
+        return { emoji: '⚪', cls: '', label: '—' };
+      }
+      if (pct >= 80) return { emoji: '🟢', cls: 'pct-green', label: pct + '%' };
+      if (pct >= 70) return { emoji: '🟡', cls: 'pct-yellow', label: pct + '%' };
+      if (pct >= 50) return { emoji: '🟠', cls: 'pct-orange', label: pct + '%' };
+      return { emoji: '🔴', cls: 'pct-red', label: pct + '%' };
+    }
+    function pctHtml(pct) {
+      var m = attPctMeta(pct);
+      return '<span class="pct ' + m.cls + '">' + m.emoji + ' ' + m.label + '</span>';
+    }
+
+    /* ---------- Condición de cursado ---------- */
+
+    function condBadge(s) {
+      if (s.condition === 'libre') {
+        return '<button class="badge badge-warning cond-badge" title="Cambiar condición de cursado" onclick="toggleCondition(\'' + s.id + '\')">🟡 CURSANDO LIBRE</button>';
+      }
+      return '<button class="badge badge-success cond-badge" title="Cambiar condición de cursado" onclick="toggleCondition(\'' + s.id + '\')">🟢 CURSANDO</button>';
+    }
+
+    function toggleCondition(studentId) {
+      var course = getCourse();
+      if (!course) return;
+      var s = null;
+      for (var i = 0; i < course.students.length; i++) {
+        if (course.students[i].id === studentId) s = course.students[i];
+      }
+      if (!s) return;
+      var nuevo = (s.condition === 'libre') ? 'cursando' : 'libre';
+      var ok;
+      if (nuevo === 'libre') {
+        ok = confirm('¿Marcar a ' + s.lastName + ', ' + s.firstName + ' como CURSANDO LIBRE?\n\nEl estudiante NO se elimina ni se oculta: seguirá en los listados, con notas, evaluaciones, promedio y asistencia normales. Es solo un recordatorio visual.');
+      } else {
+        ok = confirm('¿Volver a poner a ' + s.lastName + ', ' + s.firstName + ' en condición CURSANDO?');
+      }
+      if (!ok) return;
+      s.condition = nuevo;
+      saveDb('ssd_courses', db.courses);
+      refreshCourseViews();
+      renderNotasView();
+      renderResumenView();
+    }
+
+    /* ---------- Tema ---------- */
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggleBtn').innerText = '☀️ Modo Claro';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('themeToggleBtn').innerText = '🌙 Modo Oscuro';
+      }
+    }
+    function toggleTheme() {
+      db.theme = db.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('ssd_theme', db.theme);
+      applyTheme(db.theme);
+    }
+
+    /* ---------- Año lectivo ---------- */
+
+    function initGlobalYearSelect() {
+      var select = document.getElementById('globalYearSelect');
+      select.innerHTML = '';
+      var years = [db.globalYear - 1, db.globalYear, db.globalYear + 1, db.globalYear + 2];
+      var uniq = years.filter(function(v, i) { return years.indexOf(v) === i; }).sort();
+      uniq.forEach(function(y) {
+        select.innerHTML += '<option value="' + y + '"' + (y === db.globalYear ? ' selected' : '') + '>' + y + '</option>';
+      });
+    }
+    function changeGlobalYear(yr) {
+      db.globalYear = parseInt(yr);
+      localStorage.setItem('ssd_globalYear', db.globalYear);
+      initGlobalYearSelect();
+      renderCoursesGrid();
+      loadTrimesterInputs();
+      var sel = null;
+      for (var i = 0; i < db.courses.length; i++) {
+        if (db.courses[i].id === selectedCourseId) sel = db.courses[i];
+      }
+      if (!sel || sel.yearLectivo !== db.globalYear) {
+        selectedCourseId = null;
+        document.getElementById('activeCourseDetailPanel').classList.add('hidden');
+      } else {
+        selectCourse(selectedCourseId);
+      }
+    }
+
+    /* ---------- Navegación ---------- */
+
+    function switchNavTab(tabName, btn) {
+      var btns = document.querySelectorAll('.nav-tab-btn');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+      var tabs = document.querySelectorAll('.main-tab-content');
+      for (var j = 0; j < tabs.length; j++) tabs[j].classList.add('hidden');
+      var btnEl = btn || document.querySelector('.nav-tab-btn[data-tab="' + tabName + '"]');
+      if (btnEl) btnEl.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+    }
+    function switchCourseSubtab(subName, btn) {
+      var btns = document.querySelectorAll('.course-subnav-btn');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+      var views = document.querySelectorAll('.course-subtab-view');
+      for (var j = 0; j < views.length; j++) views[j].classList.add('hidden');
+      var btnEl = btn || document.querySelector('.course-subnav-btn[data-sub="' + subName + '"]');
+      if (btnEl) btnEl.classList.add('active');
+      document.getElementById('subtab-' + subName).classList.remove('hidden');
+    }
+    function updateTrimTabs(containerId, activeTrim) {
+      var tabs = document.querySelectorAll('#' + containerId + ' .trim-tab');
+      for (var i = 0; i < tabs.length; i++) {
+        if (parseInt(tabs[i].getAttribute('data-trim')) === activeTrim) tabs[i].classList.add('active');
+        else tabs[i].classList.remove('active');
+      }
+    }
+
+    /* ---------- Perfil docente ---------- */
+
+    function renderTeacherHeader() {
+      var t = db.teacher;
+      var fullName = (t.lastName || t.name) ? (t.lastName + ' ' + t.name).trim() : 'Sin Configurar';
+      document.getElementById('docenteHeaderName').innerText = 'Docente: ' + fullName;
+      document.getElementById('docenteHeaderMeta').innerText =
+        (t.school || 'Institución sin configurar') + (t.schoolNum ? ' (' + t.schoolNum + ')' : '') +
+        (t.subject ? ' • ' + t.subject : '') + (t.locality ? ' • ' + t.locality : '');
+
+      document.getElementById('docName').value = t.name || '';
+      document.getElementById('docLastName').value = t.lastName || '';
+      document.getElementById('docDni').value = t.dni || '';
+      document.getElementById('docTitle').value = t.title || '';
+      document.getElementById('docSubject').value = t.subject || '';
+      document.getElementById('docSchool').value = t.school || '';
+      document.getElementById('docSchoolNum').value = t.schoolNum || '';
+      document.getElementById('docLocality').value = t.locality || '';
+      document.getElementById('docDept').value = t.dept || '';
+    }
+
+    function handleSaveTeacherProfile(e) {
+      e.preventDefault();
+      db.teacher = {
+        name: document.getElementById('docName').value.trim(),
+        lastName: document.getElementById('docLastName').value.trim(),
+        dni: document.getElementById('docDni').value.trim(),
+        title: document.getElementById('docTitle').value.trim(),
+        subject: document.getElementById('docSubject').value.trim(),
+        school: document.getElementById('docSchool').value.trim(),
+        schoolNum: document.getElementById('docSchoolNum').value.trim(),
+        locality: document.getElementById('docLocality').value.trim(),
+        dept: document.getElementById('docDept').value.trim()
+      };
+      saveDb('ssd_teacher', db.teacher);
+      renderTeacherHeader();
+      alert('Perfil docente actualizado correctamente.');
+    }
+
+    /* ---------- Cursos ---------- */
+
+    function courseScheduleText(c) {
+      if (c.daySchedules) {
+        var parts = [];
+        (c.days || []).forEach(function(d) {
+          var t = c.daySchedules[d];
+          parts.push(DAYS_SHORT[d] + (t ? ' ' + t : ''));
+        });
+        if (parts.length) return parts.join(', ');
+      }
+      if (c.horario) {
+        return (c.days || []).map(function(d) { return DAYS_SHORT[d]; }).join(', ') + ' — ' + c.horario;
+      }
+      return (c.days || []).map(function(d) { return DAYS_SHORT[d]; }).join(', ') || 'Sin definir';
+    }
+
+    function renderCoursesGrid() {
+      var container = document.getElementById('coursesGridContainer');
+      container.innerHTML = '';
+      var yearCourses = db.courses.filter(function(c) { return c.yearLectivo === db.globalYear; });
+
+      if (yearCourses.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:20px;">No hay cursos creados para el año lectivo ' + db.globalYear + '.</div>';
+        return;
+      }
+
+      yearCourses.forEach(function(c) {
+        var activeStdCount = (c.students || []).filter(function(s) { return s.status === 'activo'; }).length;
+        var card = document.createElement('div');
+        card.className = 'course-card' + (selectedCourseId === c.id ? ' active' : '');
+        card.onclick = function() { selectCourse(c.id); };
+        card.innerHTML =
+          '<div class="course-card-actions">' +
+            '<button class="btn btn-sm btn-secondary" title="Editar" onclick="event.stopPropagation(); editCourse(\'' + c.id + '\')">✏️</button>' +
+            '<button class="btn btn-sm btn-danger" title="Eliminar" onclick="event.stopPropagation(); deleteCourse(\'' + c.id + '\')">🗑️</button>' +
+          '</div>' +
+          '<div class="course-title">' + esc(c.year) + ' ' + esc(c.division) + ' — ' + esc(c.turno) + '</div>' +
+          '<div class="course-meta">📖 ' + esc(c.materia) + '</div>' +
+          '<div class="course-meta">🗓️ ' + esc(courseScheduleText(c)) + '</div>' +
+          '<div class="course-meta" style="margin-top:8px;">👥 <strong>' + activeStdCount + ' Estudiantes</strong></div>';
+        container.appendChild(card);
+      });
+    }
+
+    function selectCourse(courseId) {
+      selectedCourseId = courseId;
+      renderCoursesGrid();
+      var course = getCourse();
+      if (!course) return;
+
+      document.getElementById('activeCourseDetailPanel').classList.remove('hidden');
+      document.getElementById('activeCourseTitle').innerText = 'Curso: ' + course.year + ' "' + course.division + '" — Turno ' + course.turno;
+      document.getElementById('activeCourseMeta').innerText = 'Materia: ' + course.materia + ' | Horario: ' + courseScheduleText(course);
+
+      refreshCourseViews();
+    }
+
+    function refreshCourseViews() {
+      var course = getCourse();
+      if (!course) return;
+      var activeCount = (course.students || []).filter(function(s) { return s.status === 'activo'; }).length;
+      document.getElementById('activeCourseStudentCount').innerText = activeCount + ' Estudiantes';
+      renderStudentsTable();
+      renderAttendanceSheet();
+      renderAttTrimSummary();
+      renderCalendarTable();
+      renderObservationsList();
+      populateObsStudentSelect();
+      renderStatistics();
+      renderNotasView();
+      renderResumenView();
+    }
+
+    function renderDayScheduleInputs() {
+      var container = document.getElementById('daySchedulesContainer');
+      container.innerHTML = '';
+      var checked = Array.prototype.map.call(
+        document.querySelectorAll('input[name="cfgDays"]:checked'),
+        function(cb) { return parseInt(cb.value); }
+      );
+      checked.forEach(function(d) {
+        var row = document.createElement('div');
+        row.className = 'day-sched-row';
+        row.innerHTML =
+          '<label>' + DAYS_FULL[d] + ':</label>' +
+          '<input type="text" class="form-control day-sched-input" data-day="' + d + '" placeholder="Ej: 08:00 - 09:20, 10:00 - 11:20" style="flex:1; min-width:220px;">';
+        container.appendChild(row);
+      });
+    }
+
+    function handleSaveCourse(e) {
+      e.preventDefault();
+      var id = document.getElementById('cfgCourseId').value || uid();
+      var days = Array.prototype.map.call(
+        document.querySelectorAll('input[name="cfgDays"]:checked'),
+        function(cb) { return parseInt(cb.value); }
+      );
+      var daySchedules = {};
+      var schedInputs = document.querySelectorAll('.day-sched-input');
+      for (var i = 0; i < schedInputs.length; i++) {
+        if (schedInputs[i].value.trim()) daySchedules[schedInputs[i].getAttribute('data-day')] = schedInputs[i].value.trim();
+      }
+
+      var existing = null;
+      for (var j = 0; j < db.courses.length; j++) {
+        if (db.courses[j].id === id) existing = db.courses[j];
+      }
+      var newCourse = {
+        id: id,
+        yearLectivo: db.globalYear,
+        year: document.getElementById('cfgYear').value.trim(),
+        division: document.getElementById('cfgDivision').value.trim(),
+        turno: document.getElementById('cfgTurno').value,
+        materia: document.getElementById('cfgMateria').value.trim(),
+        days: days,
+        daySchedules: daySchedules,
+        horario: '',
+        students: existing ? (existing.students || []) : []
+      };
+
+      var existingIdx = -1;
+      for (var k = 0; k < db.courses.length; k++) {
+        if (db.courses[k].id === id) existingIdx = k;
+      }
+      if (existingIdx >= 0) db.courses[existingIdx] = newCourse;
+      else db.courses.push(newCourse);
+
+      saveDb('ssd_courses', db.courses);
+      resetCourseForm();
+      renderCoursesGrid();
+      alert('Curso guardado con éxito.');
+    }
+
+    function editCourse(courseId) {
+      var c = null;
+      for (var i = 0; i < db.courses.length; i++) {
+        if (db.courses[i].id === courseId) c = db.courses[i];
+      }
+      if (!c) return;
+      document.getElementById('cfgCourseId').value = c.id;
+      document.getElementById('cfgYear').value = c.year;
+      document.getElementById('cfgDivision').value = c.division;
+      document.getElementById('cfgTurno').value = c.turno;
+      document.getElementById('cfgMateria').value = c.materia;
+      var cbs = document.querySelectorAll('input[name="cfgDays"]');
+      for (var j = 0; j < cbs.length; j++) {
+        cbs[j].checked = (c.days || []).indexOf(parseInt(cbs[j].value)) !== -1;
+      }
+      renderDayScheduleInputs();
+      if (c.daySchedules) {
+        var inputs = document.querySelectorAll('.day-sched-input');
+        for (var k = 0; k < inputs.length; k++) {
+          var v = c.daySchedules[inputs[k].getAttribute('data-day')];
+          if (v) inputs[k].value = v;
+        }
+      }
+      switchNavTab('config');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteCourse(courseId) {
+      var c = null;
+      for (var i = 0; i < db.courses.length; i++) {
+        if (db.courses[i].id === courseId) c = db.courses[i];
+      }
+      if (!c) return;
+      var nStudents = (c.students || []).length;
+      var msg = '¿ELIMINAR el curso ' + c.year + ' "' + c.division + '"?';
+      msg += '\n\nSe eliminará el curso';
+      if (nStudents) msg += ', sus ' + nStudents + ' estudiantes';
+      msg += ', sus registros de asistencia, notas y observaciones. Esta acción NO se puede deshacer.';
+      msg += '\n\nConsiderá exportar una copia de seguridad primero.';
+      if (!confirm(msg)) return;
+
+      db.courses = db.courses.filter(function(x) { return x.id !== courseId; });
+      Object.keys(db.attendanceRecords).forEach(function(k) {
+        if (k.indexOf(courseId + '_') === 0) delete db.attendanceRecords[k];
+      });
+      db.observations = db.observations.filter(function(o) { return o.courseId !== courseId; });
+      delete db.evaluaciones[courseId];
+      delete db.notas[courseId];
+      saveDb('ssd_courses', db.courses);
+      saveDb('ssd_attendanceRecords', db.attendanceRecords);
+      saveDb('ssd_observations', db.observations);
+      saveDb('ssd_evaluaciones', db.evaluaciones);
+      saveDb('ssd_notas', db.notas);
+      if (selectedCourseId === courseId) {
+        selectedCourseId = null;
+        document.getElementById('activeCourseDetailPanel').classList.add('hidden');
+      }
+      renderCoursesGrid();
+    }
+
+    function resetCourseForm() {
+      document.getElementById('cfgCourseId').value = '';
+      document.getElementById('courseConfigForm').reset();
+      document.getElementById('daySchedulesContainer').innerHTML = '';
+    }
+
+    /* ---------- Estudiantes ---------- */
+
+    function addMovement(course, student, type, date, reason) {
+      db.movements.push({
+        id: uid(),
+        yearLectivo: db.globalYear,
+        courseId: course.id,
+        courseName: course.year + ' "' + course.division + '"',
+        studentId: student.id,
+        studentName: student.lastName + ', ' + student.firstName,
+        type: type,
+        date: date,
+        reason: reason || ''
+      });
+      saveDb('ssd_movements', db.movements);
+    }
+
+    function renderStudentsTable() {
+      var tbody = document.getElementById('studentTableBody');
+      tbody.innerHTML = '';
+      var course = getCourse();
+      if (!course || !course.students) return;
+
+      course.students.forEach(function(s, idx) {
+        var tr = document.createElement('tr');
+        var acciones =
+          '<button class="btn btn-sm btn-info" onclick="openStudentFile(\'' + s.id + '\')">👁 Ficha</button>';
+        if (s.status === 'activo') {
+          acciones += '<button class="btn btn-sm btn-danger" onclick="toggleStudentStatus(\'' + s.id + '\', \'baja\')">Baja</button>';
+        } else {
+          acciones += '<button class="btn btn-sm btn-success" onclick="toggleStudentStatus(\'' + s.id + '\', \'activo\')">Reactivar</button>';
+        }
+        tr.innerHTML =
+          '<td>' + (idx + 1) + '</td>' +
+          '<td><span class="clickable" onclick="openStudentFile(\'' + s.id + '\')"><strong>' + esc(s.lastName) + ', ' + esc(s.firstName) + '</strong></span></td>' +
+          '<td>' + esc(s.dni || '-') + '</td>' +
+          '<td>' + condBadge(s) + '</td>' +
+          '<td>' + fmtDate(s.entryDate) + '</td>' +
+          '<td><span class="badge ' + (s.status === 'activo' ? 'badge-success' : 'badge-danger') + '">' + esc(s.status) + '</span></td>' +
+          '<td><div class="btn-group-wrap">' + acciones + '</div></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveNewStudent(e) {
+      e.preventDefault();
+      var course = getCourse();
+      if (!course) { alert('Seleccioná un curso primero.'); return; }
+
+      var student = {
+        id: uid(),
+        lastName: document.getElementById('nsLastName').value.trim(),
+        firstName: document.getElementById('nsFirstName').value.trim(),
+        dni: document.getElementById('nsDni').value.trim(),
+        birthDate: document.getElementById('nsBirthDate').value,
+        entryDate: document.getElementById('nsEntryDate').value || todayISO(),
+        entryReason: document.getElementById('nsEntryReason').value.trim(),
+        status: 'activo',
+        condition: 'cursando',
+        exitDate: '',
+        exitReason: ''
+      };
+      course.students.push(student);
+      saveDb('ssd_courses', db.courses);
+      addMovement(course, student, 'ALTA', student.entryDate, student.entryReason);
+
+      e.target.reset();
+      document.getElementById('nsEntryDate').value = todayISO();
+      closeModal('modalAddStudent');
+      refreshCourseViews();
+      renderCoursesGrid();
+      alert('Estudiante dado de alta correctamente.');
+    }
+
+    function toggleStudentStatus(studentId, newStatus) {
+      var course = getCourse();
+      if (!course) return;
+      var s = null;
+      for (var i = 0; i < course.students.length; i++) {
+        if (course.students[i].id === studentId) s = course.students[i];
+      }
+      if (!s) return;
+
+      if (newStatus === 'baja') {
+        var motivo = prompt('Motivo de la baja (obligatorio):', '');
+        if (motivo === null) return;
+        if (!motivo.trim()) { alert('Debes indicar un motivo de baja.'); return; }
+        var fecha = prompt('Fecha de baja (AAAA-MM-DD):', todayISO());
+        if (fecha === null) return;
+        s.status = 'baja';
+        s.exitDate = fecha.trim() || todayISO();
+        s.exitReason = motivo.trim();
+        addMovement(course, s, 'BAJA', s.exitDate, s.exitReason);
+      } else {
+        if (!confirm('¿Reactivar a ' + s.lastName + ', ' + s.firstName + '? Volverá al estado ACTIVO.')) return;
+        s.status = 'activo';
+        s.exitDate = '';
+        s.exitReason = '';
+        addMovement(course, s, 'ALTA', todayISO(), 'Reactivación');
+      }
+      saveDb('ssd_courses', db.courses);
+      refreshCourseViews();
+      renderCoursesGrid();
+    }
+
+    /* ----- Ficha individual ----- */
+
+    function openStudentFile(studentId) {
+      var course = getCourse();
+      if (!course) return;
+      var s = null;
+      for (var i = 0; i < course.students.length; i++) {
+        if (course.students[i].id === studentId) s = course.students[i];
+      }
+      if (!s) return;
+
+      var P = 0, A = 0, T = 0, R = 0;
+      Object.keys(db.attendanceRecords).forEach(function(k) {
+        if (k.indexOf(course.id + '_') !== 0) return;
+        var rec = db.attendanceRecords[k][s.id];
+        if (!rec) return;
+        if (rec.status === 'P') P++; else if (rec.status === 'A') A++;
+        else if (rec.status === 'T') T++; else if (rec.status === 'R') R++;
+      });
+      var total = P + A + T + R;
+      var pct = total ? Math.round(((P + T) / total) * 100) : null;
+
+      var trimHtml = '';
+      for (var tr = 1; tr <= 3; tr++) {
+        var tdata = computeTrimesterAttendance(course, tr);
+        var tpct = null;
+        if (tdata) {
+          for (var q = 0; q < tdata.students.length; q++) {
+            if (tdata.students[q].s.id === s.id) tpct = tdata.students[q].pct;
+          }
+        }
+        trimHtml += '<div class="ficha-item" style="text-align:center;"><div class="lbl">' + tr + 'er Trimestre</div><div class="val">' + pctHtml(tpct) + '</div></div>';
+      }
+
+      var promHtml = '';
+      for (var tn = 1; tn <= 3; tn++) {
+        var pr = promedioTrim(course, s.id, tn);
+        promHtml += '<div class="ficha-item" style="text-align:center;"><div class="lbl">Promedio T' + tn + '</div><div class="val">' + (pr === null ? '—' : pr) + '</div></div>';
+      }
+
+      var stdObs = db.observations.filter(function(o) { return o.courseId === course.id && o.studentId === s.id; });
+      var stdMov = db.movements.filter(function(m) { return m.studentId === s.id && m.courseId === course.id; });
+
+      document.getElementById('studentFileContent').innerHTML =
+        '<div class="ficha-grid">' +
+          '<div class="ficha-item"><div class="lbl">Apellido</div><div class="val">' + esc(s.lastName) + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">Nombre</div><div class="val">' + esc(s.firstName) + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">DNI</div><div class="val">' + esc(s.dni || '-') + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">Fecha Nacimiento</div><div class="val">' + fmtDate(s.birthDate) + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">Fecha Ingreso</div><div class="val">' + fmtDate(s.entryDate) + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">Motivo Ingreso</div><div class="val">' + esc(s.entryReason || '-') + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">Estado</div><div class="val"><span class="badge ' + (s.status === 'activo' ? 'badge-success' : 'badge-danger') + '">' + esc(s.status.toUpperCase()) + '</span></div></div>' +
+          '<div class="ficha-item"><div class="lbl">Fecha Baja</div><div class="val">' + fmtDate(s.exitDate) + '</div></div>' +
+          '<div class="ficha-item"><div class="lbl">Motivo Baja</div><div class="val">' + esc(s.exitReason || '-') + '</div></div>' +
+        '</div>' +
+        '<div class="card" style="background:var(--bg); margin-bottom:15px;">' +
+          '<div class="card-title" style="font-size:1rem;">🏷️ Condición de Cursado</div>' +
+          '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">' +
+            condBadge(s) +
+            '<button class="btn btn-sm btn-secondary" onclick="toggleCondition(\'' + s.id + '\'); openStudentFile(\'' + s.id + '\');">Cambiar condición</button>' +
+            '<span style="font-size:0.8rem; color:var(--text-muted);">Recordatorio visual: no bloquea notas ni asistencia.</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card" style="background:var(--bg); margin-bottom:15px;">' +
+          '<div class="card-title" style="font-size:1rem;">📊 Asistencia en ' + esc(course.year) + ' "' + esc(course.division) + '"</div>' +
+          '<div class="ficha-grid">' +
+            '<div class="ficha-item" style="text-align:center;"><div class="lbl">Presentes</div><div class="val" style="color:var(--success);">' + P + '</div></div>' +
+            '<div class="ficha-item" style="text-align:center;"><div class="lbl">Tardes</div><div class="val" style="color:var(--warning);">' + T + '</div></div>' +
+            '<div class="ficha-item" style="text-align:center;"><div class="lbl">Ausentes</div><div class="val" style="color:var(--danger);">' + A + '</div></div>' +
+            '<div class="ficha-item" style="text-align:center;"><div class="lbl">Retiros</div><div class="val" style="color:var(--info);">' + R + '</div></div>' +
+            '<div class="ficha-item" style="text-align:center;"><div class="lbl">% Anual (P+T)</div><div class="val">' + pctHtml(pct) + '</div></div>' +
+          '</div>' +
+          '<div class="ficha-grid" style="margin-bottom:0;">' + trimHtml + '</div>' +
+        '</div>' +
+        '<div class="card" style="background:var(--bg); margin-bottom:15px;">' +
+          '<div class="card-title" style="font-size:1rem;">🎓 Promedios por Trimestre</div>' +
+          '<div class="ficha-grid" style="margin-bottom:0;">' + promHtml + '</div>' +
+        '</div>' +
+        '<div class="card" style="background:var(--bg); margin-bottom:15px;">' +
+          '<div class="card-title" style="font-size:1rem;">📜 Movimientos (Altas/Bajas)</div>' +
+          (stdMov.length
+            ? stdMov.map(function(m) {
+                return '<div class="obs-item"><span><span class="badge ' + (m.type === 'ALTA' ? 'badge-success' : 'badge-danger') + '">' + m.type + '</span> <strong>' + fmtDate(m.date) + '</strong> — ' + esc(m.reason || 'Sin motivo') + '</span></div>';
+              }).join('')
+            : '<div style="color:var(--text-muted); font-size:0.9rem;">Sin movimientos registrados.</div>') +
+        '</div>' +
+        '<div class="card" style="background:var(--bg); margin-bottom:0;">' +
+          '<div class="card-title" style="font-size:1rem;">💬 Observaciones vinculadas</div>' +
+          (stdObs.length
+            ? stdObs.map(function(o) {
+                return '<div class="obs-item"><span><strong>' + fmtDate(o.date) + ':</strong> ' + esc(o.text) + '</span></div>';
+              }).join('')
+            : '<div style="color:var(--text-muted); font-size:0.9rem;">Sin observaciones individuales.</div>') +
+        '</div>';
+      openModal('modalStudentFile');
+    }
+
+    /* ----- Carga masiva ----- */
+
+    function openBulkModal() {
+      bulkParsed = [];
+      document.getElementById('bulkTextInput').value = '';
+      document.getElementById('bulkPreviewContainer').innerHTML = '';
+      document.getElementById('bulkImportBtn').classList.add('hidden');
+      openModal('modalBulkStudent');
+    }
+
+    function detectDelim(line) {
+      var cands = ['|', '\t', ';', ','];
+      var best = '|', bestCount = 0;
+      cands.forEach(function(d) {
+        var n = line.split(d).length - 1;
+        if (n > bestCount) { bestCount = n; best = d; }
+      });
+      return best;
+    }
+    function splitLine(line, delim) {
+      return line.split(delim).map(function(p) { return p.trim(); });
+    }
+
+    function parseBulkText(text) {
+      var lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l; });
+      if (!lines.length) return [];
+      var startIdx = 0;
+      var colMap = { apellido: 0, nombre: 1, dni: 2 };
+      var firstLower = lines[0].toLowerCase();
+      if (firstLower.indexOf('apell') !== -1 || firstLower.indexOf('nombr') !== -1 || firstLower.indexOf('dni') !== -1) {
+        var delim = detectDelim(lines[0]);
+        var headers = splitLine(lines[0], delim).map(function(h) { return h.toLowerCase(); });
+        headers.forEach(function(h, i) {
+          if (h.indexOf('apell') !== -1) colMap.apellido = i;
+          else if (h.indexOf('nombr') !== -1) colMap.nombre = i;
+          else if (h.indexOf('dni') !== -1) colMap.dni = i;
+        });
+        startIdx = 1;
+      }
+      return lines.slice(startIdx).map(function(l) {
+        var parts = splitLine(l, detectDelim(l));
+        return {
+          lastName: (parts[colMap.apellido] || '').trim(),
+          firstName: (parts[colMap.nombre] || '').trim(),
+          dni: (parts[colMap.dni] || '').trim()
+        };
+      }).filter(function(s) { return s.lastName || s.firstName; });
+    }
+
+    function renderBulkPreview() {
+      var text = document.getElementById('bulkTextInput').value;
+      bulkParsed = parseBulkText(text);
+      var container = document.getElementById('bulkPreviewContainer');
+      var btn = document.getElementById('bulkImportBtn');
+
+      if (!bulkParsed.length) {
+        container.innerHTML = '<div class="info-banner warn">No se detectaron filas válidas. Usá el formato: <strong>Apellido | Nombre | DNI</strong></div>';
+        btn.classList.add('hidden');
+        return;
+      }
+
+      var course = getCourse();
+      var existingDnis = course ? (course.students || []).map(function(s) { return (s.dni || '').trim(); }).filter(function(d) { return d; }) : [];
+      var dup = 0;
+      bulkParsed.forEach(function(s) { if (s.dni && existingDnis.indexOf(s.dni) !== -1) dup++; });
+
+      var htmlx = '<p style="font-size:0.9rem; margin-bottom:8px;"><strong>' + bulkParsed.length + ' estudiantes detectados.</strong>';
+      if (dup) htmlx += ' <span style="color:var(--warning);">⚠️ ' + dup + ' DNI ya existen en el curso (se omitirán).</span>';
+      htmlx += ' Revisá la vista previa antes de importar:</p>';
+      htmlx += '<div class="table-responsive"><table><thead><tr><th>#</th><th>Apellido</th><th>Nombre</th><th>DNI</th></tr></thead><tbody>';
+      bulkParsed.forEach(function(s, i) {
+        var isDup = s.dni && existingDnis.indexOf(s.dni) !== -1;
+        htmlx += '<tr' + (isDup ? ' style="background:rgba(217,119,6,0.12);"' : '') + '><td>' + (i + 1) + '</td><td>' + esc(s.lastName) + '</td><td>' + esc(s.firstName) + '</td><td>' + esc(s.dni || '-') + (isDup ? ' ⚠️' : '') + '</td></tr>';
+      });
+      htmlx += '</tbody></table></div>';
+      container.innerHTML = htmlx;
+      btn.classList.remove('hidden');
+      btn.innerText = '✅ Importar ' + bulkParsed.length + ' Estudiantes';
+    }
+
+    function importCsvFile(e, fromBulkModal) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('bulkTextInput').value = evt.target.result;
+        renderBulkPreview();
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+      if (!fromBulkModal) openModal('modalBulkStudent');
+    }
+
+    function importBulkStudents() {
+      var course = getCourse();
+      if (!course) { alert('Seleccioná un curso primero.'); return; }
+      if (!bulkParsed.length) return;
+      var existingDnis = (course.students || []).map(function(s) { return (s.dni || '').trim(); }).filter(function(d) { return d; });
+      var imported = 0;
+      bulkParsed.forEach(function(s) {
+        if (s.dni && existingDnis.indexOf(s.dni) !== -1) return;
+        var student = {
+          id: uid(),
+          lastName: s.lastName, firstName: s.firstName, dni: s.dni,
+          birthDate: '', entryDate: todayISO(), entryReason: 'Carga masiva',
+          status: 'activo', condition: 'cursando', exitDate: '', exitReason: ''
+        };
+        course.students.push(student);
+        addMovement(course, student, 'ALTA', todayISO(), 'Carga masiva');
+        imported++;
+      });
+      saveDb('ssd_courses', db.courses);
+      closeModal('modalBulkStudent');
+      refreshCourseViews();
+      renderCoursesGrid();
+      alert(imported + ' estudiantes importados correctamente.');
+    }
+
+    /* ----- Historial altas/bajas ----- */
+
+    function openMovementsModal() {
+      var course = getCourse();
+      var list = db.movements.filter(function(m) {
+        if (course) return m.courseId === course.id && m.yearLectivo === db.globalYear;
+        return m.yearLectivo === db.globalYear;
+      }).sort(function(a, b) { return a.date < b.date ? 1 : -1; });
+      var container = document.getElementById('movementsListContainer');
+      if (!list.length) {
+        container.innerHTML = '<div style="color:var(--text-muted);">Sin movimientos registrados' + (course ? ' para este curso' : '') + '.</div>';
+      } else {
+        container.innerHTML = list.map(function(m) {
+          return '<div class="obs-item"><span><span class="badge ' + (m.type === 'ALTA' ? 'badge-success' : 'badge-danger') + '">' + m.type + '</span> <strong>' + fmtDate(m.date) + '</strong> — ' + esc(m.studentName) + ' (' + esc(m.courseName) + ')</span><span style="color:var(--text-muted); font-size:0.85rem;">' + esc(m.reason || 'Sin motivo') + '</span></div>';
+        }).join('');
+      }
+      openModal('modalMovements');
+    }
+
+    /* ---------- NOTAS Y EVALUACIONES ---------- */
+
+    function getEvaluaciones(courseId, trim) {
+      if (!db.evaluaciones[courseId]) db.evaluaciones[courseId] = {};
+      if (!db.evaluaciones[courseId][trim]) db.evaluaciones[courseId][trim] = [];
+      return db.evaluaciones[courseId][trim];
+    }
+    function saveEvaluaciones() { saveDb('ssd_evaluaciones', db.evaluaciones); }
+    function getNotasEval(courseId, evalId) {
+      if (!db.notas[courseId]) db.notas[courseId] = {};
+      if (!db.notas[courseId][evalId]) db.notas[courseId][evalId] = {};
+      return db.notas[courseId][evalId];
+    }
+    function saveNotas() { saveDb('ssd_notas', db.notas); }
+
+    function promedioTrim(course, studentId, trim) {
+      var evals = getEvaluaciones(course.id, trim);
+      var sum = 0, n = 0;
+      evals.forEach(function(ev) {
+        var v = getNotasEval(course.id, ev.id)[studentId];
+        if (v !== null && v !== undefined && v !== '' && !isNaN(v)) { sum += Number(v); n++; }
+      });
+      return n ? Math.round((sum / n) * 100) / 100 : null;
+    }
+
+    function setNotasTrim(t) {
+      notasTrim = t;
+      updateTrimTabs('notasTrimTabs', t);
+      renderNotasView();
+    }
+
+    function renderNotasView() {
+      var course = getCourse();
+      var container = document.getElementById('notasTableContainer');
+      if (!course) { container.innerHTML = ''; return; }
+      updateTrimTabs('notasTrimTabs', notasTrim);
+
+      var evals = getEvaluaciones(course.id, notasTrim);
+      var students = (course.students || []).filter(function(s) { return s.status === 'activo'; });
+
+      if (!students.length) {
+        container.innerHTML = '<div class="info-banner info">El curso no tiene estudiantes activos.</div>';
+        return;
+      }
+
+      var htmlx = '';
+      if (!evals.length) {
+        htmlx += '<div class="info-banner info">No hay evaluaciones creadas para este trimestre. Usá el botón <strong>+ Nueva Evaluación</strong> para crear una (aparecerá una columna para cargar la nota de cada estudiante).</div>';
+      }
+
+      htmlx += '<div class="table-responsive"><table><thead><tr><th>Estudiante</th><th>Condición</th>';
+      evals.forEach(function(ev) {
+        htmlx += '<th style="text-align:center;">' + esc(ev.name) + '<br><small style="font-weight:400;">' + fmtDate(ev.date) + ' · ' + esc(ev.type) + '</small><br>' +
+          '<button class="btn btn-sm btn-danger" onclick="deleteEvaluacion(\'' + ev.id + '\')">🗑️ Quitar</button></th>';
+      });
+      htmlx += '<th style="text-align:center;">Promedio T' + notasTrim + '</th></tr></thead><tbody>';
+
+      students.forEach(function(s) {
+        htmlx += '<tr><td><strong>' + esc(s.lastName) + ', ' + esc(s.firstName) + '</strong></td>';
+        htmlx += '<td>' + condBadge(s) + '</td>';
+        evals.forEach(function(ev) {
+          var v = getNotasEval(course.id, ev.id)[s.id];
+          htmlx += '<td style="text-align:center;"><input type="number" min="0" max="10" step="0.5" class="nota-input" value="' + (v === null || v === undefined ? '' : v) + '" onchange="setNota(\'' + ev.id + '\', \'' + s.id + '\', this.value)" placeholder="—"></td>';
+        });
+        var pr = promedioTrim(course, s.id, notasTrim);
+        htmlx += '<td style="text-align:center;"><strong style="font-size:1.05rem;">' + (pr === null ? '—' : pr) + '</strong></td></tr>';
+      });
+
+      htmlx += '</tbody></table></div>';
+      if (evals.length) {
+        htmlx += '<p style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">Promedio = media de las notas cargadas de este trimestre únicamente. Los trimestres son independientes.</p>';
+      }
+      container.innerHTML = htmlx;
+    }
+
+    function saveEvaluacion(e) {
+      e.preventDefault();
+      var course = getCourse();
+      if (!course) { alert('Seleccioná un curso primero.'); return; }
+      var evals = getEvaluaciones(course.id, notasTrim);
+      evals.push({
+        id: uid(),
+        date: document.getElementById('evDate').value || todayISO(),
+        name: document.getElementById('evName').value.trim(),
+        type: document.getElementById('evType').value
+      });
+      saveEvaluaciones();
+      e.target.reset();
+      document.getElementById('evDate').value = todayISO();
+      closeModal('modalNewEval');
+      renderNotasView();
+      renderResumenView();
+    }
+
+    function deleteEvaluacion(evalId) {
+      var course = getCourse();
+      if (!course) return;
+      if (!confirm('¿Eliminar esta evaluación y todas las notas cargadas en ella?')) return;
+      var list = getEvaluaciones(course.id, notasTrim);
+      db.evaluaciones[course.id][notasTrim] = list.filter(function(ev) { return ev.id !== evalId; });
+      if (db.notas[course.id]) delete db.notas[course.id][evalId];
+      saveEvaluaciones();
+      saveNotas();
+      renderNotasView();
+      renderResumenView();
+    }
+
+    function setNota(evalId, stdId, value) {
+      var course = getCourse();
+      if (!course) return;
+      var notas = getNotasEval(course.id, evalId);
+      if (value === '' || value === null) {
+        notas[stdId] = null;
+      } else {
+        var v = parseFloat(value);
+        if (isNaN(v)) v = null;
+        else { if (v < 0) v = 0; if (v > 10) v = 10; }
+        notas[stdId] = v;
+      }
+      saveNotas();
+      renderNotasView();
+      renderResumenView();
+    }
+
+    /* ---------- ASISTENCIA ---------- */
+
+    function getNoAct(dateStr) {
+      for (var i = 0; i < db.noActivityDays.length; i++) {
+        if (db.noActivityDays[i].date === dateStr) return db.noActivityDays[i];
+      }
+      return null;
+    }
+
+    function renderAttendanceSheet() {
+      var dateInput = document.getElementById('attendanceDateInput');
+      if (!dateInput.value) dateInput.value = todayISO();
+      var selectedDate = dateInput.value;
+      var course = getCourse();
+      if (!course) return;
+
+      var noAct = getNoAct(selectedDate);
+      var alertBox = document.getElementById('noClassDayAlert');
+      var saveBtn = document.getElementById('saveAttBtn');
+      if (noAct) {
+        alertBox.classList.remove('hidden');
+        var isTeacherAbs = noAct.reason === TEACHER_ABSENCE;
+        document.getElementById('noClassAlertTitle').innerText = isTeacherAbs ? 'AUSENCIA DEL DOCENTE' : 'DÍA SIN ACTIVIDAD';
+        document.getElementById('noClassReason').innerText = noAct.reason + (noAct.note ? ' — ' + noAct.note : '');
+        saveBtn.disabled = true;
+      } else {
+        alertBox.classList.add('hidden');
+        saveBtn.disabled = false;
+      }
+
+      var dow = new Date(selectedDate + 'T00:00:00').getDay();
+      var infoBox = document.getElementById('notClassDayInfo');
+      if (!noAct && course.days && course.days.length && course.days.indexOf(dow) === -1) {
+        infoBox.classList.remove('hidden');
+      } else {
+        infoBox.classList.add('hidden');
+      }
+
+      var tbody = document.getElementById('attendanceTableBody');
+      tbody.innerHTML = '';
+      var recKey = course.id + '_' + selectedDate;
+      var savedRec = db.attendanceRecords[recKey] || {};
+
+      (course.students || []).filter(function(s) { return s.status === 'activo'; }).forEach(function(s) {
+        var attState = savedRec[s.id] ? savedRec[s.id].status : 'P';
+        var attNote = savedRec[s.id] ? (savedRec[s.id].note || '') : '';
+        var dis = noAct ? 'disabled' : '';
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><strong>' + esc(s.lastName) + ', ' + esc(s.firstName) + '</strong></td>' +
+          '<td><div class="attendance-btn-group">' +
+            '<button class="att-btn att-p' + (attState === 'P' ? ' active' : '') + '" ' + dis + ' onclick="setAttState(this)">P</button>' +
+            '<button class="att-btn att-a' + (attState === 'A' ? ' active' : '') + '" ' + dis + ' onclick="setAttState(this)">A</button>' +
+            '<button class="att-btn att-t' + (attState === 'T' ? ' active' : '') + '" ' + dis + ' onclick="setAttState(this)">T</button>' +
+            '<button class="att-btn att-r' + (attState === 'R' ? ' active' : '') + '" ' + dis + ' onclick="setAttState(this)">R</button>' +
+          '</div></td>' +
+          '<td><input type="text" class="form-control std-att-note" data-std="' + s.id + '" value="' + esc(attNote) + '" placeholder="Observación opcional" ' + dis + '></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setAttState(btn) {
+      var btns = btn.parentElement.querySelectorAll('.att-btn');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+      btn.classList.add('active');
+    }
+
+    function saveAttendanceRecord() {
+      var course = getCourse();
+      if (!course) return;
+      var selectedDate = document.getElementById('attendanceDateInput').value;
+      if (getNoAct(selectedDate)) { alert('No se puede guardar asistencia: el día está marcado como sin actividad.'); return; }
+      var activeCount = (course.students || []).filter(function(s) { return s.status === 'activo'; }).length;
+      if (!activeCount) { alert('El curso no tiene estudiantes activos para tomar asistencia.'); return; }
+
+      var recKey = course.id + '_' + selectedDate;
+      var record = {};
+      var rows = document.querySelectorAll('#attendanceTableBody tr');
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var stdId = row.querySelector('.std-att-note').getAttribute('data-std');
+        var activeBtn = row.querySelector('.att-btn.active');
+        record[stdId] = {
+          status: activeBtn ? activeBtn.innerText : 'P',
+          note: row.querySelector('.std-att-note').value
+        };
+      }
+
+      db.attendanceRecords[recKey] = record;
+      saveDb('ssd_attendanceRecords', db.attendanceRecords);
+      renderCalendarTable();
+      renderStatistics();
+      renderAttTrimSummary();
+      renderResumenView();
+      alert('Asistencia del ' + fmtDate(selectedDate) + ' guardada correctamente.');
+    }
+
+    /* ----- Asistencia por trimestre ----- */
+
+    function trimesterRange(trim) {
+      var t = getTrimesters(db.globalYear);
+      if (trim === 1) return { start: t.t1Start, end: t.t1End };
+      if (trim === 2) return { start: t.t2Start, end: t.t2End };
+      return { start: t.t3Start, end: t.t3End };
+    }
+
+    function computeTrimesterAttendance(course, trim) {
+      var range = trimesterRange(trim);
+      if (!range.start || !range.end) return null;
+      var allDays = generateClassDays(course).filter(function(d) { return d >= range.start && d <= range.end; });
+      var computableDays = allDays.filter(function(d) {
+        return !getNoAct(d) && db.attendanceRecords[course.id + '_' + d];
+      });
+      var students = (course.students || []).filter(function(s) { return s.status === 'activo'; }).map(function(s) {
+        var attended = 0;
+        computableDays.forEach(function(d) {
+          var rec = db.attendanceRecords[course.id + '_' + d][s.id];
+          if (rec && (rec.status === 'P' || rec.status === 'T')) attended++;
+        });
+        var pct = computableDays.length ? Math.round((attended / computableDays.length) * 100) : null;
+        return { s: s, attended: attended, pct: pct };
+      });
+      return { computables: computableDays.length, students: students };
+    }
+
+    function setAttTrim(t) {
+      attTrim = t;
+      updateTrimTabs('attTrimTabs', t);
+      renderAttTrimSummary();
+    }
+
+    function renderAttTrimSummary() {
+      var container = document.getElementById('attTrimContainer');
+      var course = getCourse();
+      if (!course) { container.innerHTML = ''; return; }
+      updateTrimTabs('attTrimTabs', attTrim);
+
+      var data = computeTrimesterAttendance(course, attTrim);
+      if (!data) {
+        container.innerHTML = '<div class="info-banner info">Configurá las fechas del trimestre en "Configuración de Cursos" para calcular la asistencia trimestral.</div>';
+        return;
+      }
+      if (!data.computables) {
+        container.innerHTML = '<div class="info-banner info">Aún no hay clases computables en este trimestre (días de clase con asistencia tomada, sin contar feriados/paros/suspensiones). El porcentaje aparecerá automáticamente al cargar asistencias.</div>';
+        return;
+      }
+
+      var htmlx = '<p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;">Clases computables del trimestre: <strong>' + data.computables + '</strong> (días de clase con asistencia tomada, excluyendo días sin actividad y ausencias del docente).</p>';
+      htmlx += '<div class="table-responsive"><table><thead><tr><th>Estudiante</th><th>Condición</th><th>Asistidas (P+T)</th><th>Clases Computables</th><th>% Asistencia</th></tr></thead><tbody>';
+      data.students.forEach(function(row) {
+        htmlx += '<tr><td><strong>' + esc(row.s.lastName) + ', ' + esc(row.s.firstName) + '</strong></td>' +
+          '<td>' + condBadge(row.s) + '</td>' +
+          '<td style="text-align:center;">' + row.attended + '</td>' +
+          '<td style="text-align:center;">' + data.computables + '</td>' +
+          '<td>' + pctHtml(row.pct) + '</td></tr>';
+      });
+      htmlx += '</tbody></table></div>';
+      container.innerHTML = htmlx;
+    }
+
+    /* ----- Resumen conjunto (notas + asistencia) ----- */
+
+    function setResumenTrim(t) {
+      resumenTrim = t;
+      updateTrimTabs('resumenTrimTabs', t);
+      renderResumenView();
+    }
+
+    function renderResumenView() {
+      var tbody = document.getElementById('resumenTableBody');
+      var course = getCourse();
+      if (!course) { tbody.innerHTML = ''; return; }
+      updateTrimTabs('resumenTrimTabs', resumenTrim);
+
+      var students = (course.students || []).filter(function(s) { return s.status === 'activo'; });
+      tbody.innerHTML = '';
+      if (!students.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted);">El curso no tiene estudiantes activos.</td></tr>';
+        return;
+      }
+
+      var attData = computeTrimesterAttendance(course, resumenTrim);
+      var attMap = {};
+      if (attData) {
+        attData.students.forEach(function(row) { attMap[row.s.id] = row.pct; });
+      }
+
+      students.forEach(function(s, idx) {
+        var pr = promedioTrim(course, s.id, resumenTrim);
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + (idx + 1) + '</td>' +
+          '<td><strong>' + esc(s.lastName) + ', ' + esc(s.firstName) + '</strong></td>' +
+          '<td>' + condBadge(s) + '</td>' +
+          '<td style="text-align:center;"><strong>' + (pr === null ? '—' : pr) + '</strong></td>' +
+          '<td>' + pctHtml(attMap[s.id] !== undefined ? attMap[s.id] : null) + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ---------- Calendario ---------- */
+
+    function generateClassDays(course) {
+      var t = getTrimesters(db.globalYear);
+      var start = t.t1Start, end = t.t3End;
+      if (!start || !end || !course.days || !course.days.length) return [];
+      var res = [];
+      var d = new Date(start + 'T00:00:00');
+      var endD = new Date(end + 'T00:00:00');
+      var guard = 0;
+      while (d <= endD && guard < 500) {
+        if (course.days.indexOf(d.getDay()) !== -1) {
+          res.push(d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()));
+        }
+        d.setDate(d.getDate() + 1);
+        guard++;
+      }
+      return res;
+    }
+
+    function renderCalendarTable() {
+      var tbody = document.getElementById('calendarTableBody');
+      var hint = document.getElementById('calendarHint');
+      tbody.innerHTML = '';
+      var course = getCourse();
+      if (!course) return;
+
+      var classDays = generateClassDays(course);
+      if (!classDays.length) {
+        hint.classList.remove('hidden');
+        db.noActivityDays.forEach(function(d) {
+          var isTeacherAbs = d.reason === TEACHER_ABSENCE;
+          tbody.innerHTML += '<tr><td>' + fmtDate(d.date) + '</td><td>' + DAYS_FULL[new Date(d.date + 'T00:00:00').getDay()] + '</td>' +
+            '<td><span class="badge ' + (isTeacherAbs ? 'badge-danger' : 'badge-warning') + '">' + (isTeacherAbs ? 'AUSENCIA DOCENTE' : esc(d.reason.toUpperCase())) + '</span></td>' +
+            '<td>' + esc(d.note || 'Sin actividad') + '</td></tr>';
+        });
+        return;
+      }
+      hint.classList.add('hidden');
+
+      classDays.forEach(function(dateStr) {
+        var noAct = getNoAct(dateStr);
+        var rec = db.attendanceRecords[course.id + '_' + dateStr];
+        var dow = DAYS_FULL[new Date(dateStr + 'T00:00:00').getDay()];
+        var badge, desc;
+        if (noAct) {
+          var isTA = noAct.reason === TEACHER_ABSENCE;
+          badge = '<span class="badge ' + (isTA ? 'badge-danger' : 'badge-warning') + '">' + (isTA ? 'AUSENCIA DOCENTE' : esc(noAct.reason.toUpperCase())) + '</span>';
+          desc = esc(noAct.note || (isTA ? 'El docente no asistió' : 'Sin actividad'));
+        } else if (rec) {
+          var p = 0, a = 0, t2 = 0, r = 0;
+          Object.keys(rec).forEach(function(k) {
+            if (rec[k].status === 'P') p++; else if (rec[k].status === 'A') a++;
+            else if (rec[k].status === 'T') t2++; else r++;
+          });
+          badge = '<span class="badge badge-success">CLASE REALIZADA</span>';
+          desc = 'Asistencia: ' + p + ' P / ' + a + ' A / ' + t2 + ' T / ' + r + ' R';
+        } else {
+          badge = '<span class="badge badge-secondary">CLASE PROGRAMADA</span>';
+          desc = esc(courseScheduleText(course));
+        }
+        tbody.innerHTML += '<tr><td>' + fmtDate(dateStr) + '</td><td>' + dow + '</td><td>' + badge + '</td><td>' + desc + '</td></tr>';
+      });
+    }
+
+    /* ---------- Observaciones ---------- */
+
+    function populateObsStudentSelect() {
+      var sel = document.getElementById('obsStudentSelect');
+      var course = getCourse();
+      sel.innerHTML = '<option value="">— Todo el curso —</option>';
+      if (!course) return;
+      (course.students || []).forEach(function(s) {
+        sel.innerHTML += '<option value="' + s.id + '">' + esc(s.lastName) + ', ' + esc(s.firstName) + '</option>';
+      });
+    }
+
+    function addPedagogicalObservation() {
+      var course = getCourse();
+      if (!course) return;
+      var stdId = document.getElementById('obsStudentSelect').value;
+      var dt = document.getElementById('obsDateInput').value || todayISO();
+      var txt = document.getElementById('obsTextInput').value.trim();
+      if (!txt) return alert('Escribí la observación');
+
+      db.observations.push({ id: uid(), courseId: course.id, studentId: stdId, date: dt, text: txt });
+      saveDb('ssd_observations', db.observations);
+      document.getElementById('obsTextInput').value = '';
+      renderObservationsList();
+    }
+
+    function renderObservationsList() {
+      var container = document.getElementById('observationsListContainer');
+      container.innerHTML = '';
+      var course = getCourse();
+      if (!course) return;
+      var courseObs = db.observations.filter(function(o) { return o.courseId === course.id; }).sort(function(a, b) { return a.date < b.date ? 1 : -1; });
+
+      if (courseObs.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted);">Sin observaciones registradas.</div>';
+        return;
+      }
+
+      courseObs.forEach(function(o) {
+        var std = null;
+        for (var i = 0; i < (course.students || []).length; i++) {
+          if (course.students[i].id === o.studentId) std = course.students[i];
+        }
+        var div = document.createElement('div');
+        div.className = 'obs-item';
+        div.innerHTML = '<span><strong>📅 ' + fmtDate(o.date) + '</strong>' +
+          (std ? ' — ' + esc(std.lastName) + ', ' + esc(std.firstName) : ' — <em>Todo el curso</em>') +
+          ': ' + esc(o.text) + '</span>' +
+          '<button class="btn btn-sm btn-danger" onclick="deleteObservation(\'' + o.id + '\')">🗑️</button>';
+        container.appendChild(div);
+      });
+    }
+
+    function deleteObservation(obsId) {
+      if (!confirm('¿Eliminar esta observación?')) return;
+      db.observations = db.observations.filter(function(o) { return o.id !== obsId; });
+      saveDb('ssd_observations', db.observations);
+      renderObservationsList();
+    }
+
+    /* ---------- Estadísticas ---------- */
+
+    function computeCourseStats(course) {
+      var classDays = generateClassDays(course);
+      var held = 0, noClass = 0, teacherAbs = 0;
+      classDays.forEach(function(d) {
+        var noAct = getNoAct(d);
+        if (noAct) {
+          noClass++;
+          if (noAct.reason === TEACHER_ABSENCE) teacherAbs++;
+        } else if (db.attendanceRecords[course.id + '_' + d]) {
+          held++;
+        }
+      });
+      var t = getTrimesters(db.globalYear);
+      if (t.t1Start && t.t3End) {
+        db.noActivityDays.forEach(function(n) {
+          if (n.reason === TEACHER_ABSENCE && n.date >= t.t1Start && n.date <= t.t3End && classDays.indexOf(n.date) === -1) {
+            teacherAbs++;
+          }
+        });
+      }
+
+      var P = 0, A = 0, T = 0, R = 0;
+      Object.keys(db.attendanceRecords).forEach(function(k) {
+        if (k.indexOf(course.id + '_') !== 0) return;
+        var rec = db.attendanceRecords[k];
+        Object.keys(rec).forEach(function(stdId) {
+          var st = rec[stdId].status;
+          if (st === 'P') P++; else if (st === 'A') A++; else if (st === 'T') T++; else if (st === 'R') R++;
+        });
+      });
+      var totalMarks = P + A + T + R;
+      var avg = totalMarks ? Math.round(((P + T) / totalMarks) * 100) : 0;
+
+      var perStudent = (course.students || []).filter(function(s) { return s.status === 'activo'; }).map(function(s) {
+        var p = 0, a = 0, t2 = 0, r = 0;
+        Object.keys(db.attendanceRecords).forEach(function(k) {
+          if (k.indexOf(course.id + '_') !== 0) return;
+          var rec = db.attendanceRecords[k][s.id];
+          if (!rec) return;
+          if (rec.status === 'P') p++; else if (rec.status === 'A') a++;
+          else if (rec.status === 'T') t2++; else if (rec.status === 'R') r++;
+        });
+        var tot = p + a + t2 + r;
+        return { s: s, p: p, a: a, t: t2, r: r, pct: tot ? Math.round(((p + t2) / tot) * 100) : null };
+      });
+
+      return { scheduled: classDays.length, held: held, noClass: noClass, teacherAbs: teacherAbs, P: P, A: A, T: T, R: R, avg: avg, perStudent: perStudent };
+    }
+
+    function renderStatistics() {
+      var course = getCourse();
+      if (!course) return;
+      var st = computeCourseStats(course);
+      document.getElementById('statScheduledClasses').innerText = st.scheduled;
+      document.getElementById('statHeldClasses').innerText = st.held;
+      document.getElementById('statNoClassDays').innerText = st.noClass;
+      document.getElementById('statTeacherAbs').innerText = st.teacherAbs;
+      document.getElementById('statAvgAttendance').innerText = st.avg + '%';
+      document.getElementById('statDetailText').innerText =
+        'Marcas totales: ' + st.P + ' presentes, ' + st.T + ' tardes, ' + st.A + ' ausentes, ' + st.R + ' retiros.';
+
+      var tbody = document.getElementById('statStudentTableBody');
+      tbody.innerHTML = '';
+      if (!st.perStudent.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted);">Sin estudiantes activos.</td></tr>';
+        return;
+      }
+      st.perStudent.forEach(function(ps) {
+        tbody.innerHTML += '<tr><td><strong>' + esc(ps.s.lastName) + ', ' + esc(ps.s.firstName) + '</strong></td>' +
+          '<td style="color:var(--success); font-weight:700;">' + ps.p + '</td>' +
+          '<td style="color:var(--warning); font-weight:700;">' + ps.t + '</td>' +
+          '<td style="color:var(--danger); font-weight:700;">' + ps.a + '</td>' +
+          '<td style="color:var(--info); font-weight:700;">' + ps.r + '</td>' +
+          '<td>' + pctHtml(ps.pct) + '</td></tr>';
+      });
+    }
+
+    /* ---------- Trimestres ---------- */
+
+    function loadTrimesterInputs() {
+      var t = getTrimesters(db.globalYear);
+      document.getElementById('trimYearBadge').innerText = 'Año ' + db.globalYear;
+      document.getElementById('trim1Start').value = t.t1Start || '';
+      document.getElementById('trim1End').value = t.t1End || '';
+      document.getElementById('trim2Start').value = t.t2Start || '';
+      document.getElementById('trim2End').value = t.t2End || '';
+      document.getElementById('trim3Start').value = t.t3Start || '';
+      document.getElementById('trim3End').value = t.t3End || '';
+    }
+
+    function saveTrimesterConfig() {
+      db.trimesters[db.globalYear] = {
+        t1Start: document.getElementById('trim1Start').value,
+        t1End: document.getElementById('trim1End').value,
+        t2Start: document.getElementById('trim2Start').value,
+        t2End: document.getElementById('trim2End').value,
+        t3Start: document.getElementById('trim3Start').value,
+        t3End: document.getElementById('trim3End').value
+      };
+      saveDb('ssd_trimesters', db.trimesters);
+      if (selectedCourseId) refreshCourseViews();
+      alert('Calendario académico del año ' + db.globalYear + ' guardado.');
+    }
+
+    /* ---------- Días sin actividad ---------- */
+
+    function addNoActivityDay() {
+      var dt = document.getElementById('noActDate').value;
+      var reason = document.getElementById('noActReason').value;
+      var note = document.getElementById('noActNote').value.trim();
+      if (!dt) return alert('Ingresá una fecha');
+      if (getNoAct(dt)) return alert('Ya existe un día sin actividad cargado en esa fecha.');
+
+      db.noActivityDays.push({ id: uid(), date: dt, reason: reason, note: note });
+      saveDb('ssd_noActivityDays', db.noActivityDays);
+      document.getElementById('noActNote').value = '';
+      renderNoActivityTable();
+      if (selectedCourseId) refreshCourseViews();
+    }
+
+    function renderNoActivityTable() {
+      var tbody = document.getElementById('noActivityTableBody');
+      tbody.innerHTML = '';
+      var sorted = db.noActivityDays.slice().sort(function(a, b) { return a.date < b.date ? 1 : -1; });
+      sorted.forEach(function(d) {
+        var isTeacherAbs = d.reason === TEACHER_ABSENCE;
+        tbody.innerHTML += '<tr><td>' + fmtDate(d.date) + '</td>' +
+          '<td><span class="badge ' + (isTeacherAbs ? 'badge-danger' : 'badge-warning') + '">' + esc(d.reason) + '</span></td>' +
+          '<td>' + esc(d.note || '-') + '</td>' +
+          '<td><button class="btn btn-sm btn-danger" onclick="deleteNoActDay(\'' + d.id + '\')">X</button></td></tr>';
+      });
+    }
+
+    function deleteNoActDay(id) {
+      if (!confirm('¿Eliminar este día sin actividad?')) return;
+      db.noActivityDays = db.noActivityDays.filter(function(d) { return d.id !== id; });
+      saveDb('ssd_noActivityDays', db.noActivityDays);
+      renderNoActivityTable();
+      if (selectedCourseId) refreshCourseViews();
+    }
+
+    /* ---------- Copiar año anterior ---------- */
+
+    function copyPreviousYearConfig() {
+      var prevYear = db.globalYear - 1;
+      var prevCourses = db.courses.filter(function(c) { return c.yearLectivo === prevYear; });
+      if (!prevCourses.length) return alert('No hay cursos configurados en el año ' + prevYear + ' para copiar.');
+
+      var msg = 'COPIAR CONFIGURACIÓN DEL AÑO ' + prevYear + ' → ' + db.globalYear + '\n\n';
+      msg += prevCourses.length + ' cursos serán copiados con sus días y horarios.\n\n';
+      msg += 'Aceptar = copiar también los estudiantes ACTIVOS\n';
+      msg += 'Cancelar = copiar solo la estructura vacía';
+      var withStudents = confirm(msg);
+
+      prevCourses.forEach(function(c) {
+        var newStudents = [];
+        if (withStudents) {
+          newStudents = (c.students || []).filter(function(s) { return s.status === 'activo'; }).map(function(s) {
+            var copy = {};
+            for (var key in s) copy[key] = s[key];
+            copy.id = uid();
+            copy.entryDate = todayISO();
+            copy.entryReason = 'Continúa del año ' + prevYear;
+            copy.exitDate = '';
+            copy.exitReason = '';
+            copy.status = 'activo';
+            return copy;
+          });
+        }
+        db.courses.push({
+          id: uid(), yearLectivo: db.globalYear,
+          year: c.year, division: c.division, turno: c.turno, materia: c.materia,
+          days: c.days ? c.days.slice() : [],
+          daySchedules: c.daySchedules ? Object.assign({}, c.daySchedules) : {},
+          horario: c.horario || '',
+          students: newStudents
+        });
+      });
+      if (db.trimesters[prevYear]) {
+        var pt = db.trimesters[prevYear];
+        var shift = db.globalYear - prevYear;
+        function shiftYear(iso) {
+          if (!iso) return '';
+          var p = iso.split('-');
+          return (parseInt(p[0]) + shift) + '-' + p[1] + '-' + p[2];
+        }
+        db.trimesters[db.globalYear] = {
+          t1Start: shiftYear(pt.t1Start), t1End: shiftYear(pt.t1End),
+          t2Start: shiftYear(pt.t2Start), t2End: shiftYear(pt.t2End),
+          t3Start: shiftYear(pt.t3Start), t3End: shiftYear(pt.t3End)
+        };
+        saveDb('ssd_trimesters', db.trimesters);
+        loadTrimesterInputs();
+      }
+      saveDb('ssd_courses', db.courses);
+      renderCoursesGrid();
+      alert('Configuración copiada a ' + db.globalYear + (withStudents ? ' (con estudiantes).' : '.'));
+    }
+
+    /* ---------- Exportar / Importar ---------- */
+
+    function exportFullBackupJSON() {
+      var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(db, null, 2));
+      var a = document.createElement('a');
+      a.setAttribute('href', dataStr);
+      a.setAttribute('download', 'backup_seguimiento_docente_' + db.globalYear + '.json');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importFullBackupJSON(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          var imported = JSON.parse(evt.target.result);
+          if (!imported || typeof imported !== 'object' || !('courses' in imported)) {
+            alert('El archivo no parece una copia de seguridad válida.'); return;
+          }
+          if (!confirm('⚠️ ADVERTENCIA: La restauración reemplazará TODOS tus datos actuales por los de la copia. ¿Deseas continuar?')) return;
+          db = imported;
+          db.trimesters = migrateTrimesters(db.trimesters);
+          db.movements = db.movements || [];
+          db.evaluaciones = db.evaluaciones || {};
+          db.notas = db.notas || {};
+          db.observations = (db.observations || []).map(function(o) { if (!o.id) o.id = uid(); return o; });
+          db.noActivityDays = (db.noActivityDays || []).map(function(d) { if (!d.id) d.id = uid(); return d; });
+          localStorage.setItem('ssd_theme', db.theme || 'light');
+          localStorage.setItem('ssd_globalYear', db.globalYear);
+          saveDb('ssd_teacher', db.teacher);
+          saveDb('ssd_courses', db.courses);
+          saveDb('ssd_trimesters', db.trimesters);
+          saveDb('ssd_noActivityDays', db.noActivityDays);
+          saveDb('ssd_attendanceRecords', db.attendanceRecords);
+          saveDb('ssd_observations', db.observations);
+          saveDb('ssd_movements', db.movements);
+          saveDb('ssd_evaluaciones', db.evaluaciones);
+          saveDb('ssd_notas', db.notas);
+          location.reload();
+        } catch (err) {
+          alert('Error al leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    /* ----- CSV ----- */
+
+    function downloadCSV(filename, rows) {
+      var csv = rows.map(function(r) {
+        return r.map(function(c) { return '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'; }).join(',');
+      }).join('\n');
+      var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportStudentsCSV() {
+      var yearCourses = db.courses.filter(function(c) { return c.yearLectivo === db.globalYear; });
+      if (!yearCourses.length) return alert('No hay cursos en el año ' + db.globalYear + '.');
+      var rows = [['Curso', 'Turno', 'Materia', 'Apellido', 'Nombre', 'DNI', 'Fecha Nacimiento', 'Fecha Ingreso', 'Motivo Ingreso', 'Estado', 'Condicion', 'Fecha Baja', 'Motivo Baja']];
+      yearCourses.forEach(function(c) {
+        (c.students || []).forEach(function(s) {
+          rows.push([c.year + ' ' + c.division, c.turno, c.materia, s.lastName, s.firstName, s.dni || '',
+            s.birthDate || '', s.entryDate || '', s.entryReason || '', s.status, s.condition === 'libre' ? 'CURSANDO LIBRE' : 'CURSANDO', s.exitDate || '', s.exitReason || '']);
+        });
+      });
+      downloadCSV('estudiantes_' + db.globalYear + '.csv', rows);
+    }
+
+    function exportAttendanceCSV() {
+      var yearCourseIds = db.courses.filter(function(c) { return c.yearLectivo === db.globalYear; }).map(function(c) { return c.id; });
+      var keys = Object.keys(db.attendanceRecords).filter(function(k) { return yearCourseIds.indexOf(k.slice(0, -11)) !== -1; });
+      if (!keys.length) return alert('No hay registros de asistencia en el año ' + db.globalYear + '.');
+      var rows = [['Curso', 'Fecha', 'Apellido', 'Nombre', 'DNI', 'Estado', 'Observación']];
+      keys.sort().forEach(function(k) {
+        var courseId = k.slice(0, -11);
+        var date = k.slice(-10);
+        var course = null;
+        for (var i = 0; i < db.courses.length; i++) {
+          if (db.courses[i].id === courseId) course = db.courses[i];
+        }
+        if (!course) return;
+        var rec = db.attendanceRecords[k];
+        Object.keys(rec).forEach(function(stdId) {
+          var s = null;
+          for (var j = 0; j < (course.students || []).length; j++) {
+            if (course.students[j].id === stdId) s = course.students[j];
+          }
+          if (!s) return;
+          rows.push([course.year + ' ' + course.division, date, s.lastName, s.firstName, s.dni || '', rec[stdId].status, rec[stdId].note || '']);
+        });
+      });
+      downloadCSV('asistencia_' + db.globalYear + '.csv', rows);
+    }
+
+    function exportNotasCSV() {
+      var yearCourses = db.courses.filter(function(c) { return c.yearLectivo === db.globalYear; });
+      if (!yearCourses.length) return alert('No hay cursos en el año ' + db.globalYear + '.');
+      var rows = [['Curso', 'Trimestre', 'Evaluación', 'Fecha', 'Tipo', 'Apellido', 'Nombre', 'DNI', 'Nota', 'Promedio del Trimestre']];
+      yearCourses.forEach(function(c) {
+        for (var trim = 1; trim <= 3; trim++) {
+          var evals = (db.evaluaciones[c.id] && db.evaluaciones[c.id][trim]) || [];
+          (c.students || []).forEach(function(s) {
+            var prom = promedioTrim(c, s.id, trim);
+            if (!evals.length) {
+              rows.push([c.year + ' ' + c.division, trim, '(sin evaluaciones)', '', '', s.lastName, s.firstName, s.dni || '', '', prom === null ? '' : prom]);
+              return;
+            }
+            evals.forEach(function(ev) {
+              var v = (db.notas[c.id] && db.notas[c.id][ev.id]) ? db.notas[c.id][ev.id][s.id] : null;
+              rows.push([c.year + ' ' + c.division, trim, ev.name, ev.date, ev.type, s.lastName, s.firstName, s.dni || '', v === null || v === undefined ? '' : v, prom === null ? '' : prom]);
+            });
+          });
+        }
+      });
+      downloadCSV('notas_' + db.globalYear + '.csv', rows);
+    }
+
+    /* ---------- Integridad e inicialización ---------- */
+
+    function ensureDataIntegrity() {
+      var changed = false;
+      db.courses.forEach(function(c) {
+        c.students = c.students || [];
+        c.students.forEach(function(s) {
+          if (!s.id) { s.id = uid(); changed = true; }
+          if (!s.status) { s.status = 'activo'; changed = true; }
+          if (!s.condition) { s.condition = 'cursando'; changed = true; }
+          if (s.entryDate === undefined) { s.entryDate = ''; changed = true; }
+          if (s.entryReason === undefined) { s.entryReason = ''; changed = true; }
+          if (s.exitDate === undefined) { s.exitDate = ''; changed = true; }
+          if (s.exitReason === undefined) { s.exitReason = ''; changed = true; }
+        });
+      });
+      db.observations.forEach(function(o) { if (!o.id) { o.id = uid(); changed = true; } });
+      db.noActivityDays.forEach(function(d) { if (!d.id) { d.id = uid(); changed = true; } });
+      if (changed) {
+        saveDb('ssd_courses', db.courses);
+        saveDb('ssd_observations', db.observations);
+        saveDb('ssd_noActivityDays', db.noActivityDays);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      ensureDataIntegrity();
+      applyTheme(db.theme);
+      initGlobalYearSelect();
+      renderTeacherHeader();
+      renderCoursesGrid();
+      renderNoActivityTable();
+      loadTrimesterInputs();
+      renderDayScheduleInputs();
+      document.getElementById('attendanceDateInput').value = todayISO();
+      document.getElementById('obsDateInput').value = todayISO();
+      document.getElementById('noActDate').value = todayISO();
+      document.getElementById('nsEntryDate').value = todayISO();
+      document.getElementById('evDate').value = todayISO();
+      updateTrimTabs('notasTrimTabs', notasTrim);
+      updateTrimTabs('attTrimTabs', attTrim);
+      updateTrimTabs('resumenTrimTabs', resumenTrim);
+    });
+  </script>
+</body>
+</html>
