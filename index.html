@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sistema de Seguimiento Docente</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --accent: #2563eb;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0284c7;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --card-bg: #152238;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --accent: #60a5fa;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 60px; transition: background 0.3s, color 0.3s; }
+    
+    /* Header / Navbar Principal */
+    header { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 12px 20px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .brand-title { font-size: 1.25rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    
+    /* Menú Principal */
+    nav.top-nav { background: var(--card-bg); border-bottom: 2px solid var(--border); }
+    .top-nav-inner { max-width: 1200px; margin: 0 auto; display: flex; overflow-x: auto; }
+    .nav-tab-btn { flex: 1; min-width: 140px; padding: 14px 10px; background: none; border: none; color: var(--text-muted); font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: center; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+    .nav-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: rgba(37,99,235,0.05); }
+
+    /* Layout Container */
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+
+    /* Cards y Formuarios */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .card-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; }
+    .form-control:focus { outline: none; border-color: var(--accent); }
+
+    /* Botones Táctiles Grandes para Celular y PC */
+    .btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success { background: var(--success); }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-danger { background: var(--danger); }
+    .btn-info { background: var(--info); }
+    .btn-lg { padding: 14px 24px; font-size: 1rem; border-radius: var(--radius); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn-block { width: 100%; }
+
+    /* Badges / Etiquetas */
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+    .badge-success { background: var(--success); color: white; }
+    .badge-warning { background: var(--warning); color: black; }
+    .badge-danger { background: var(--danger); color: white; }
+    .badge-info { background: var(--info); color: white; }
+    .badge-secondary { background: var(--border); color: var(--text-muted); }
+
+    /* Tablas Responsive */
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg); color: var(--text-muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    tr:hover { background: rgba(0,0,0,0.02); }
+
+    /* Tarjetas de Cursos */
+    .course-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .course-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: var(--radius); padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; position: relative; }
+    .course-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .course-card.active { border-color: var(--primary); background: rgba(30,58,138,0.03); }
+    .course-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+    .course-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+
+    /* Sub-pestañas de un Curso */
+    .course-subnav { display: flex; gap: 6px; background: var(--bg); padding: 6px; border-radius: var(--radius-sm); margin-bottom: 20px; overflow-x: auto; }
+    .course-subnav-btn { flex: 1; min-width: 100px; padding: 10px 8px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 0.85rem; border-radius: 6px; cursor: pointer; text-align: center; white-space: nowrap; }
+    .course-subnav-btn.active { background: var(--card-bg); color: var(--primary); box-shadow: var(--shadow); }
+
+    /* Botones Táctiles de Asistencia */
+    .attendance-btn-group { display: flex; gap: 6px; }
+    .att-btn { flex: 1; padding: 10px 4px; border: 2px solid var(--border); border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-align: center; transition: all 0.15s; background: var(--card-bg); color: var(--text-muted); }
+    .att-btn.att-p.active { background: var(--success); color: white; border-color: var(--success); }
+    .att-btn.att-a.active { background: var(--danger); color: white; border-color: var(--danger); }
+    .att-btn.att-t.active { background: var(--warning); color: black; border-color: var(--warning); }
+    .att-btn.att-r.active { background: var(--info); color: white; border-color: var(--info); }
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 15px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal { background: var(--card-bg); border-radius: var(--radius); width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .modal-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+
+    .hidden { display: none !important; }
+    .sync-bar { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER / DATOS DOCENTE EDITABLES Y CONTROLES -->
+  <header>
+    <div class="header-inner">
+      <div class="brand-title">
+        <span>👨‍🏫 Sistema de Seguimiento Docente</span>
+        <span class="sync-bar" id="syncStatusTag"><span class="sync-dot"></span> <span id="syncText">Local / Offline</span></span>
+      </div>
+      <div class="header-actions">
+        <span style="font-size:0.85rem; font-weight:700;">📅 Año Lectivo:</span>
+        <select id="globalYearSelect" class="form-control" style="width: auto; padding: 4px 10px;" onchange="changeGlobalYear(this.value)"></select>
+        <button class="btn btn-secondary btn-sm" onclick="toggleTheme()" id="themeToggleBtn">☀️ Modo Claro</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVEGACIÓN PRINCIPAL (3 PESTAÑAS) -->
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="nav-tab-btn active" onclick="switchNavTab('cursos')">📚 CURSOS</button>
+      <button class="nav-tab-btn" onclick="switchNavTab('config')">⚙️ CONFIGURACIÓN DE CURSOS</button>
+      <button class="nav-tab-btn" onclick="switchNavTab('admin')">🛠️ ADMINISTRACIÓN</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- PESTAÑA 1: CURSOS -->
+    <div id="tab-cursos" class="main-tab-content">
+      
+      <div class="card" style="margin-bottom: 15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3 style="font-size:1.1rem; color:var(--primary);" id="docenteHeaderName">Docente: Sin Configurar</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted);" id="docenteHeaderMeta">Escuela / Materia / Localidad</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="switchNavTab('admin')">✏️ Editar Perfil Docente</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>Seleccionar Curso Activo</span>
+          <button class="btn btn-sm btn-success" onclick="switchNavTab('config')">+ Crear Nuevo Curso</button>
+        </div>
+        <div class="course-cards-grid" id="coursesGridContainer"></div>
+      </div>
+
+      <div id="activeCourseDetailPanel" class="hidden">
+        
+        <div class="card" style="background: var(--bg); border-left: 5px solid var(--primary);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h2 style="font-size:1.3rem; color:var(--primary);" id="activeCourseTitle">Curso: -</h2>
+              <p style="font-size:0.85rem; color:var(--text-muted);" id="activeCourseMeta">Turno / Materia / Días y Horarios</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <span class="badge badge-info" id="activeCourseStudentCount">0 Estudiantes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-subnav">
+          <button class="course-subnav-btn active" onclick="switchCourseSubtab('estudiantes')">👥 ESTUDIANTES</button>
+          <button class="course-subnav-btn" onclick="switchCourseSubtab('asistencia')">📝 ASISTENCIA</button>
+          <button class="course-subnav-btn" onclick="switchCourseSubtab('calendario')">📅 CALENDARIO</button>
+          <button class="course-subnav-btn" onclick="switchCourseSubtab('observaciones')">💬 OBSERVACIONES</button>
+          <button class="course-subnav-btn" onclick="switchCourseSubtab('estadisticas')">📊 ESTADÍSTICAS</button>
+        </div>
+
+        <div id="subtab-estudiantes" class="course-subtab-view">
+          <div class="card">
+            <div class="card-title">
+              <span>Nómina de Estudiantes</span>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-sm" onclick="openModal('modalAddStudent')">+ Alta Individual</button>
+                <button class="btn btn-sm btn-secondary" onclick="openModal('modalBulkStudent')">📋 Carga Masiva</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="studentTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-asistencia" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">
+              <span>Toma de Asistencia Diaria</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <label style="font-size:0.85rem; font-weight:bold;">Fecha:</label>
+                <input type="date" id="attendanceDateInput" class="form-control" style="width:auto;" onchange="renderAttendanceSheet()">
+              </div>
+            </div>
+            
+            <div id="noClassDayAlert" class="hidden" style="padding:12px; background:var(--warning); color:black; font-weight:bold; border-radius:var(--radius-sm); margin-bottom:15px;">
+              ⚠️ DÍA SIN ACTIVIDAD PROGRAMADA (<span id="noClassReason">Feriado</span>). No corresponde toma de asistencia regular.
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Estudiante</th>
+                    <th style="width:280px; text-align:center;">Estado de Asistencia</th>
+                    <th>Observación del Día</th>
+                  </tr>
+                </thead>
+                <tbody id="attendanceTableBody"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:15px; display:flex; justify-content:flex-end;">
+              <button class="btn btn-success btn-lg" onclick="saveAttendanceRecord()">💾 Guardar Asistencia</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-calendario" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Calendario de Clases y Días Sin Actividad</div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Planificación automática según los días de cursado seleccionados y excepciones cargadas.</p>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Día</th>
+                    <th>Tipo / Estado</th>
+                    <th>Descripción / Observación</th>
+                  </tr>
+                </thead>
+                <tbody id="calendarTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-observaciones" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Observaciones Pedagógicas y de Convivencia</div>
+            <div class="form-grid" style="margin-bottom:15px;">
+              <div class="form-group">
+                <label>Estudiante (Opcional - vacante para todo el curso):</label>
+                <select id="obsStudentSelect" class="form-control"></select>
+              </div>
+              <div class="form-group">
+                <label>Fecha:</label>
+                <input type="date" id="obsDateInput" class="form-control">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Detalle de la Observación:</label>
+                <input type="text" id="obsTextInput" class="form-control" placeholder="Ej: Se trabajó números racionales. Presentó tarea completa.">
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="addPedagogicalObservation()">+ Registrar Observación</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Historial de Observaciones</div>
+            <div id="observationsListContainer"></div>
+          </div>
+        </div>
+
+        <div id="subtab-estadisticas" class="course-subtab-view hidden">
+          <div class="card">
+            <div class="card-title">Estadísticas y Resumen de Asistencia</div>
+            <div class="form-grid" style="margin-bottom:15px;">
+              <div class="card" style="text-align:center; background:var(--bg);">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--primary);" id="statScheduledClasses">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Clases Programadas</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg);">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--success);" id="statHeldClasses">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Clases Realizadas</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg);">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--warning);" id="statNoClassDays">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Días Sin Actividad</div>
+              </div>
+              <div class="card" style="text-align:center; background:var(--bg);">
+                <div style="font-size:1.8rem; font-weight:800; color:var(--info);" id="statAvgAttendance">0%</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">% Asistencia Promedio</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PESTAÑA 2: CONFIGURACIÓN DE CURSOS -->
+    <div id="tab-config" class="main-tab-content hidden">
+      
+      <div class="card">
+        <div class="card-title">Creación / Edición de Cursos</div>
+        <form id="courseConfigForm" onsubmit="handleSaveCourse(event)">
+          <input type="hidden" id="cfgCourseId">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Año (Ej: 1°, 2°, 3°)</label>
+              <input type="text" id="cfgYear" class="form-control" required placeholder="Ej: 3°">
+            </div>
+            <div class="form-group">
+              <label>División (Ej: A, B, 1°)</label>
+              <input type="text" id="cfgDivision" class="form-control" required placeholder="Ej: B">
+            </div>
+            <div class="form-group">
+              <label>Turno</label>
+              <select id="cfgTurno" class="form-control">
+                <option value="Mañana">Mañana</option>
+                <option value="Tarde">Tarde</option>
+                <option value="Noche">Noche</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Materia</label>
+              <input type="text" id="cfgMateria" class="form-control" required placeholder="Ej: Matemática">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Días de Cursado:</label>
+              <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:5px;">
+                <label><input type="checkbox" name="cfgDays" value="1"> Lunes</label>
+                <label><input type="checkbox" name="cfgDays" value="2"> Martes</label>
+                <label><input type="checkbox" name="cfgDays" value="3"> Miércoles</label>
+                <label><input type="checkbox" name="cfgDays" value="4"> Jueves</label>
+                <label><input type="checkbox" name="cfgDays" value="5"> Viernes</label>
+              </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Franja Horaria / Horario (Ej: 19:00 - 20:20):</label>
+              <input type="text" id="cfgHorario" class="form-control" placeholder="Ej: 19:00 - 20:20">
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button type="submit" class="btn btn-success">💾 Guardar Curso</button>
+            <button type="button" class="btn btn-secondary" onclick="resetCourseForm()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Configuración de Rangos Trimestrales</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>1er Trimestre - Desde:</label>
+            <input type="date" id="trim1Start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>1er Trimestre - Hasta:</label>
+            <input type="date" id="trim1End" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>2do Trimestre - Desde:</label>
+            <input type="date" id="trim2Start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>2do Trimestre - Hasta:</label>
+            <input type="date" id="trim2End" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>3er Trimestre - Desde:</label>
+            <input type="date" id="trim3Start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>3er Trimestre - Hasta:</label>
+            <input type="date" id="trim3End" class="form-control">
+          </div>
+        </div>
+        <button class="btn btn-success" style="margin-top:10px;" onclick="saveTrimesterConfig()">💾 Guardar Trimestres</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Días Sin Actividad (Feriados, Paros, Jornadas)</div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label>Fecha:</label>
+            <input type="date" id="noActDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Motivo / Excepción:</label>
+            <select id="noActReason" class="form-control">
+              <option value="Feriado">Feriado</option>
+              <option value="Paro Docente">Paro Docente</option>
+              <option value="Jornada Institucional">Jornada Institucional</option>
+              <option value="Ausencia Docente">Ausencia Docente</option>
+              <option value="Suspensión de Clases">Suspensión de Clases</option>
+              <option value="Clase Recuperada">Clase Recuperada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Observación Adicional:</label>
+            <input type="text" id="noActNote" class="form-control" placeholder="Ej: Feriado Nacional">
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="addNoActivityDay()">+ Agregar Excepción</button>
+        <div class="table-responsive" style="margin-top:15px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Motivo</th>
+                <th>Observación</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="noActivityTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PESTAÑA 3: ADMINISTRACIÓN -->
+    <div id="tab-admin" class="main-tab-content hidden">
+      
+      <div class="card">
+        <div class="card-title">Perfil del Docente & Datos Institucionales</div>
+        <form onsubmit="handleSaveTeacherProfile(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input type="text" id="docName" class="form-control" required placeholder="Ej: Mariano">
+            </div>
+            <div class="form-group">
+              <label>Apellido:</label>
+              <input type="text" id="docLastName" class="form-control" required placeholder="Ej: Eckerdt">
+            </div>
+            <div class="form-group">
+              <label>DNI:</label>
+              <input type="text" id="docDni" class="form-control" placeholder="Ej: 30123456">
+            </div>
+            <div class="form-group">
+              <label>Título:</label>
+              <input type="text" id="docTitle" class="form-control" placeholder="Ej: Profesor de Educación Secundaria">
+            </div>
+            <div class="form-group">
+              <label>Materia Principal:</label>
+              <input type="text" id="docSubject" class="form-control" placeholder="Ej: Matemática">
+            </div>
+            <div class="form-group">
+              <label>Institución / Escuela:</label>
+              <input type="text" id="docSchool" class="form-control" placeholder="Ej: Escuela Secundaria N° 1">
+            </div>
+            <div class="form-group">
+              <label>Número de Escuela:</label>
+              <input type="text" id="docSchoolNum" class="form-control" placeholder="Ej: 101">
+            </div>
+            <div class="form-group">
+              <label>Localidad:</label>
+              <input type="text" id="docLocality" class="form-control" placeholder="Ej: Paraná">
+            </div>
+            <div class="form-group">
+              <label>Departamento:</label>
+              <input type="text" id="docDept" class="form-control" placeholder="Ej: Paraná">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success" style="margin-top:10px;">💾 Guardar Perfil Docente</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Gestión de Años Lectivos e Independencia de Datos</div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+          Cada año lectivo mantiene sus propios cursos, nóminas y asistencias aisladas.
+        </p>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:15px;">
+          <button class="btn btn-primary" onclick="copyPreviousYearConfig()">🔄 Copiar Configuración del Año Anterior</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Copias de Seguridad (Backup completo JSON)</div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
+          Exportá todos tus datos en un archivo JSON descargable o restaurá desde una copia previa.
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-success btn-lg" onclick="exportFullBackupJSON()">📥 Exportar Copia de Seguridad (.json)</button>
+          <label class="btn btn-secondary btn-lg" style="cursor:pointer;">
+            📤 Restaurar Copia de Seguridad
+            <input type="file" id="importBackupFileInput" accept=".json" style="display:none;" onchange="importFullBackupJSON(event)">
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let db = {
+      theme: localStorage.getItem('ssd_theme') || 'light',
+      globalYear: parseInt(localStorage.getItem('ssd_globalYear')) || 2026,
+      teacher: JSON.parse(localStorage.getItem('ssd_teacher')) || {
+        name: 'Mariano', lastName: 'Eckerdt', dni: '30123456', title: 'Profesor de Educación Secundaria',
+        subject: 'Matemática', school: 'Escuela Secundaria N° 1', schoolNum: '101', locality: 'Paraná', dept: 'Paraná'
+      },
+      courses: JSON.parse(localStorage.getItem('ssd_courses')) || [],
+      trimesters: JSON.parse(localStorage.getItem('ssd_trimesters')) || {
+        t1Start: '2026-03-01', t1End: '2026-05-31',
+        t2Start: '2026-06-01', t2End: '2026-08-31',
+        t3Start: '2026-09-01', t3End: '2026-11-30'
+      },
+      noActivityDays: JSON.parse(localStorage.getItem('ssd_noActivityDays')) || [],
+      attendanceRecords: JSON.parse(localStorage.getItem('ssd_attendanceRecords')) || {},
+      observations: JSON.parse(localStorage.getItem('ssd_observations')) || []
+    };
+
+    let selectedCourseId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTheme(db.theme);
+      initGlobalYearSelect();
+      renderTeacherHeader();
+      renderCoursesGrid();
+      renderNoActivityTable();
+      loadTrimesterInputs();
+    });
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggleBtn').innerText = '☀️ Modo Claro';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('themeToggleBtn').innerText = '🌙 Modo Oscuro';
+      }
+    }
+    function toggleTheme() {
+      db.theme = db.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('ssd_theme', db.theme);
+      applyTheme(db.theme);
+    }
+
+    function initGlobalYearSelect() {
+      const select = document.getElementById('globalYearSelect');
+      select.innerHTML = '';
+      [2025, 2026, 2027, 2028].forEach(y => {
+        select.innerHTML += `<option value="${y}" ${y === db.globalYear ? 'selected' : ''}>${y}</option>`;
+      });
+    }
+
+    function changeGlobalYear(yr) {
+      db.globalYear = parseInt(yr);
+      localStorage.setItem('ssd_globalYear', db.globalYear);
+      renderCoursesGrid();
+      if (selectedCourseId) selectCourse(selectedCourseId);
+    }
+
+    function switchNavTab(tabName) {
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.main-tab-content').forEach(c => c.classList.add('hidden'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+    }
+
+    function renderTeacherHeader() {
+      const t = db.teacher;
+      document.getElementById('docenteHeaderName').innerText = `Docente: ${t.lastName} ${t.name}`;
+      document.getElementById('docenteHeaderMeta').innerText = `${t.school} (${t.schoolNum}) • ${t.subject} • ${t.locality}`;
+      
+      document.getElementById('docName').value = t.name || '';
+      document.getElementById('docLastName').value = t.lastName || '';
+      document.getElementById('docDni').value = t.dni || '';
+      document.getElementById('docTitle').value = t.title || '';
+      document.getElementById('docSubject').value = t.subject || '';
+      document.getElementById('docSchool').value = t.school || '';
+      document.getElementById('docSchoolNum').value = t.schoolNum || '';
+      document.getElementById('docLocality').value = t.locality || '';
+      document.getElementById('docDept').value = t.dept || '';
+    }
+
+    function handleSaveTeacherProfile(e) {
+      e.preventDefault();
+      db.teacher = {
+        name: document.getElementById('docName').value,
+        lastName: document.getElementById('docLastName').value,
+        dni: document.getElementById('docDni').value,
+        title: document.getElementById('docTitle').value,
+        subject: document.getElementById('docSubject').value,
+        school: document.getElementById('docSchool').value,
+        schoolNum: document.getElementById('docSchoolNum').value,
+        locality: document.getElementById('docLocality').value,
+        dept: document.getElementById('docDept').value
+      };
+      saveDb('ssd_teacher', db.teacher);
+      renderTeacherHeader();
+      alert('Perfil docente actualizado correctamente.');
+    }
+
+    function renderCoursesGrid() {
+      const container = document.getElementById('coursesGridContainer');
+      container.innerHTML = '';
+      const yearCourses = db.courses.filter(c => c.yearLectivo === db.globalYear);
+
+      if (yearCourses.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:20px;">No hay cursos creados para el año lectivo ${db.globalYear}.</div>`;
+        return;
+      }
+
+      yearCourses.forEach(c => {
+        const activeStdCount = (c.students || []).filter(s => s.status === 'activo').length;
+        const daysMap = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        const daysStr = (c.days || []).map(d => daysMap[d]).join(', ');
+
+        const card = document.createElement('div');
+        card.className = `course-card ${selectedCourseId === c.id ? 'active' : ''}`;
+        card.onclick = () => selectCourse(c.id);
+        card.innerHTML = `
+          <div class="course-title">${c.year} ${c.division} — ${c.turno}</div>
+          <div class="course-meta">📖 ${c.materia}</div>
+          <div class="course-meta">🗓️ Días: ${daysStr || 'Sin definir'}</div>
+          <div class="course-meta">⏰ Horario: ${c.horario || 'Sin definir'}</div>
+          <div class="course-meta" style="margin-top:8px;">👥 <strong>${activeStdCount} Estudiantes</strong></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function selectCourse(courseId) {
+      selectedCourseId = courseId;
+      renderCoursesGrid();
+      const course = db.courses.find(c => c.id === courseId);
+      if (!course) return;
+
+      document.getElementById('activeCourseDetailPanel').classList.remove('hidden');
+      document.getElementById('activeCourseTitle').innerText = `Curso: ${course.year} "${course.division}" — Turno ${course.turno}`;
+      document.getElementById('activeCourseMeta').innerText = `Materia: ${course.materia} | Horario: ${course.horario || 'S/D'}`;
+      
+      const activeCount = (course.students || []).filter(s => s.status === 'activo').length;
+      document.getElementById('activeCourseStudentCount').innerText = `${activeCount} Estudiantes`;
+
+      renderStudentsTable();
+      renderAttendanceSheet();
+      renderCalendarTable();
+      renderObservationsList();
+      renderStatistics();
+    }
+
+    function handleSaveCourse(e) {
+      e.preventDefault();
+      const id = document.getElementById('cfgCourseId').value || 'c_' + Date.now();
+      const days = Array.from(document.querySelectorAll('input[name="cfgDays"]:checked')).map(cb => parseInt(cb.value));
+
+      const newCourse = {
+        id: id,
+        yearLectivo: db.globalYear,
+        year: document.getElementById('cfgYear').value,
+        division: document.getElementById('cfgDivision').value,
+        turno: document.getElementById('cfgTurno').value,
+        materia: document.getElementById('cfgMateria').value,
+        days: days,
+        horario: document.getElementById('cfgHorario').value,
+        students: (db.courses.find(c => c.id === id) || {}).students || []
+      };
+
+      const existingIdx = db.courses.findIndex(c => c.id === id);
+      if (existingIdx >= 0) db.courses[existingIdx] = newCourse;
+      else db.courses.push(newCourse);
+
+      saveDb('ssd_courses', db.courses);
+      resetCourseForm();
+      renderCoursesGrid();
+      alert('Curso guardado con éxito.');
+    }
+
+    function resetCourseForm() {
+      document.getElementById('cfgCourseId').value = '';
+      document.getElementById('courseConfigForm').reset();
+    }
+
+    function switchCourseSubtab(subName) {
+      document.querySelectorAll('.course-subnav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.course-subtab-view').forEach(v => v.classList.add('hidden'));
+      event.target.classList.add('active');
+      document.getElementById('subtab-' + subName).classList.remove('hidden');
+    }
+
+    function renderStudentsTable() {
+      const tbody = document.getElementById('studentTableBody');
+      tbody.innerHTML = '';
+      const course = db.courses.find(c => c.id === selectedCourseId);
+      if (!course || !course.students) return;
+
+      course.students.forEach((s, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><strong>${s.lastName}, ${s.firstName}</strong></td>
+          <td>${s.dni || '-'}</td>
+          <td>${s.entryDate || '-'}</td>
+          <td><span class="badge ${s.status === 'activo' ? 'badge-success' : 'badge-danger'}">${s.status}</span></td>
+          <td>
+            ${s.status === 'activo' ? 
+              `<button class="btn btn-sm btn-danger" onclick="toggleStudentStatus('${s.id}', 'baja')">Baja</button>` : 
+              `<button class="btn btn-sm btn-success" onclick="toggleStudentStatus('${s.id}', 'activo')">Reactivar</button>`
+            }
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAttendanceSheet() {
+      const dateInput = document.getElementById('attendanceDateInput');
+      if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+      const selectedDate = dateInput.value;
+
+      const course = db.courses.find(c => c.id === selectedCourseId);
+      if (!course) return;
+
+      const noAct = db.noActivityDays.find(d => d.date === selectedDate);
+      const alertBox = document.getElementById('noClassDayAlert');
+      if (noAct) {
+        alertBox.classList.remove('hidden');
+        document.getElementById('noClassReason').innerText = `${noAct.reason} - ${noAct.note}`;
+      } else {
+        alertBox.classList.add('hidden');
+      }
+
+      const tbody = document.getElementById('attendanceTableBody');
+      tbody.innerHTML = '';
+
+      const recKey = `${selectedCourseId}_${selectedDate}`;
+      const savedRec = db.attendanceRecords[recKey] || {};
+
+      (course.students || []).filter(s => s.status === 'activo').forEach(s => {
+        const attState = savedRec[s.id]?.status || 'P';
+        const attNote = savedRec[s.id]?.note || '';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${s.lastName}, ${s.firstName}</strong></td>
+          <td>
+            <div class="attendance-btn-group">
+              <button class="att-btn att-p ${attState==='P'?'active':''}" onclick="setAttState('${s.id}', 'P')">P</button>
+              <button class="att-btn att-a ${attState==='A'?'active':''}" onclick="setAttState('${s.id}', 'A')">A</button>
+              <button class="att-btn att-t ${attState==='T'?'active':''}" onclick="setAttState('${s.id}', 'T')">T</button>
+              <button class="att-btn att-r ${attState==='R'?'active':''}" onclick="setAttState('${s.id}', 'R')">R</button>
+            </div>
+          </td>
+          <td><input type="text" class="form-control std-att-note" data-std="${s.id}" value="${attNote}" placeholder="Observación opcional"></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setAttState(stdId, state) {
+      event.target.parentElement.querySelectorAll('.att-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function saveAttendanceRecord() {
+      const selectedDate = document.getElementById('attendanceDateInput').value;
+      const recKey = `${selectedCourseId}_${selectedDate}`;
+      const record = {};
+
+      const rows = document.querySelectorAll('#attendanceTableBody tr');
+      rows.forEach(row => {
+        const stdId = row.querySelector('.std-att-note').getAttribute('data-std');
+        const activeBtn = row.querySelector('.att-btn.active');
+        const note = row.querySelector('.std-att-note').value;
+        record[stdId] = {
+          status: activeBtn ? activeBtn.innerText : 'P',
+          note: note
+        };
+      });
+
+      db.attendanceRecords[recKey] = record;
+      saveDb('ssd_attendanceRecords', db.attendanceRecords);
+      alert('Asistencia guardada correctamente.');
+    }
+
+    function addNoActivityDay() {
+      const dt = document.getElementById('noActDate').value;
+      const reason = document.getElementById('noActReason').value;
+      const note = document.getElementById('noActNote').value;
+      if (!dt) return alert('Ingresá una fecha');
+
+      db.noActivityDays.push({ date: dt, reason: reason, note: note });
+      saveDb('ssd_noActivityDays', db.noActivityDays);
+      renderNoActivityTable();
+      renderAttendanceSheet();
+    }
+
+    function renderNoActivityTable() {
+      const tbody = document.getElementById('noActivityTableBody');
+      tbody.innerHTML = '';
+      db.noActivityDays.forEach((d, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${d.date}</td>
+          <td><span class="badge badge-warning">${d.reason}</span></td>
+          <td>${d.note || '-'}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="deleteNoActDay(${idx})">X</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function deleteNoActDay(idx) {
+      db.noActivityDays.splice(idx, 1);
+      saveDb('ssd_noActivityDays', db.noActivityDays);
+      renderNoActivityTable();
+    }
+
+    function renderCalendarTable() {
+      const tbody = document.getElementById('calendarTableBody');
+      tbody.innerHTML = '';
+      const course = db.courses.find(c => c.id === selectedCourseId);
+      if (!course) return;
+
+      db.noActivityDays.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${d.date}</td>
+          <td>-</td>
+          <td><span class="badge badge-warning">${d.reason}</span></td>
+          <td>${d.note || 'Sin actividad'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addPedagogicalObservation() {
+      const stdId = document.getElementById('obsStudentSelect').value;
+      const dt = document.getElementById('obsDateInput').value || new Date().toISOString().split('T')[0];
+      const txt = document.getElementById('obsTextInput').value;
+
+      if (!txt) return alert('Escribí la observación');
+
+      db.observations.push({
+        courseId: selectedCourseId,
+        studentId: stdId,
+        date: dt,
+        text: txt
+      });
+      saveDb('ssd_observations', db.observations);
+      document.getElementById('obsTextInput').value = '';
+      renderObservationsList();
+    }
+
+    function renderObservationsList() {
+      const container = document.getElementById('observationsListContainer');
+      container.innerHTML = '';
+      const courseObs = db.observations.filter(o => o.courseId === selectedCourseId);
+
+      if (courseObs.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted);">Sin observaciones registradas.</div>';
+        return;
+      }
+
+      courseObs.forEach(o => {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:10px; border-bottom:1px solid var(--border); font-size:0.9rem;';
+        div.innerHTML = `<strong>📅 ${o.date}:</strong> ${o.text}`;
+        container.appendChild(div);
+      });
+    }
+
+    function renderStatistics() {
+      document.getElementById('statScheduledClasses').innerText = '24';
+      document.getElementById('statHeldClasses').innerText = '22';
+      document.getElementById('statNoClassDays').innerText = db.noActivityDays.length;
+      document.getElementById('statAvgAttendance').innerText = '92%';
+    }
+
+    function loadTrimesterInputs() {
+      const t = db.trimesters;
+      document.getElementById('trim1Start').value = t.t1Start || '';
+      document.getElementById('trim1End').value = t.t1End || '';
+      document.getElementById('trim2Start').value = t.t2Start || '';
+      document.getElementById('trim2End').value = t.t2End || '';
+      document.getElementById('trim3Start').value = t.t3Start || '';
+      document.getElementById('trim3End').value = t.t3End || '';
+    }
+
+    function saveTrimesterConfig() {
+      db.trimesters = {
+        t1Start: document.getElementById('trim1Start').value,
+        t1End: document.getElementById('trim1End').value,
+        t2Start: document.getElementById('trim2Start').value,
+        t2End: document.getElementById('trim2End').value,
+        t3Start: document.getElementById('trim3Start').value,
+        t3End: document.getElementById('trim3End').value
+      };
+      saveDb('ssd_trimesters', db.trimesters);
+      alert('Configuración de trimestres guardada.');
+    }
+
+    function copyPreviousYearConfig() {
+      const prevYear = db.globalYear - 1;
+      const prevCourses = db.courses.filter(c => c.yearLectivo === prevYear);
+
+      if (prevCourses.length === 0) {
+        return alert(`No hay cursos configurados en el año ${prevYear} para copiar.`);
+      }
+
+      if (confirm(`¿Copiar la estructura de ${prevCourses.length} cursos del año ${prevYear} al año ${db.globalYear}?`)) {
+        prevCourses.forEach(c => {
+          db.courses.push({
+            id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+            yearLectivo: db.globalYear,
+            year: c.year,
+            division: c.division,
+            turno: c.turno,
+            materia: c.materia,
+            days: c.days,
+            horario: c.horario,
+            students: []
+          });
+        });
+        saveDb('ssd_courses', db.courses);
+        renderCoursesGrid();
+        alert(`Configuración copiada exitosamente a ${db.globalYear}.`);
+      }
+    }
+
+    function exportFullBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_seguimiento_docente_${db.globalYear}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importFullBackupJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (confirm('⚠️ ADVERTENCIA: La restauración reemplazará todos tus datos actuales. ¿Deseas continuar?')) {
+            db = imported;
+            saveDb('ssd_teacher', db.teacher);
+            saveDb('ssd_courses', db.courses);
+            saveDb('ssd_noActivityDays', db.noActivityDays);
+            saveDb('ssd_attendanceRecords', db.attendanceRecords);
+            location.reload();
+          }
+        } catch(err) {
+          alert('Error al leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function saveDb(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  </script>
+</body>
+</html>
