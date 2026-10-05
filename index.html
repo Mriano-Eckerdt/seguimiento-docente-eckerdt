@@ -528,11 +528,15 @@ tr.off td{opacity:.55}
    Pegá acá tu firebaseConfig para activar login + nube.
    Vacío = modo local (sin login, guarda en el dispositivo).
 ══════════════════════════════════════════════════════════ */
-const FIREBASE_CONFIG = {
-  apiKey: "", authDomain: "", projectId: "",
-  storageBucket: "", messagingSenderId: "", appId: ""
+const firebaseConfig = {
+  apiKey: "AIzaSyCpz2oKbLJ1OawOgQqUEmSzxiPzbWRCOhY",
+  authDomain: "seguimiento-docente-eckerdt.firebaseapp.com",
+  databaseURL: "https://seguimiento-docente-eckerdt-default-rtdb.firebaseio.com",
+  projectId: "seguimiento-docente-eckerdt",
+  storageBucket: "seguimiento-docente-eckerdt.firebasestorage.app",
+  messagingSenderId: "227746098622",
+  appId: "1:227746098622:web:30f9be32bfa2efdd579def"
 };
-
 /* ═══════════ NÚCLEO ═══════════ */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
