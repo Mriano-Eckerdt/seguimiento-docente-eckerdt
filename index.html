@@ -528,7 +528,7 @@ tr.off td{opacity:.55}
    Pegá acá tu firebaseConfig para activar login + nube.
    Vacío = modo local (sin login, guarda en el dispositivo).
 ══════════════════════════════════════════════════════════ */
-const FIREBASE_CONFIG = {
+const  = {
   apiKey: "AIzaSyCpz2oKbLJ1OawOgQqUEmSzxiPzbWRCOhY",
   authDomain: "seguimiento-docente-eckerdt.firebaseapp.com",
   databaseURL: "https://seguimiento-docente-eckerdt-default-rtdb.firebaseio.com",
@@ -611,14 +611,14 @@ function updatePill(state){
 /* ---------- Sincronización Realtime Database ---------- */
 function fbRef(){ return firebase.database().ref('users/' + App.user.uid + '/years/' + App.year); }
 function fbWrite(){
-  if (App.isLocal || !App.user || App.user.uid === 'local' || !FIREBASE_CONFIG.apiKey) return;
+  if (App.isLocal || !App.user || App.user.uid === 'local' || !.apiKey) return;
   const ts = Date.now();
   App.fbMine = ts; UB().stamps[App.year] = ts; saveLocal();
   fbRef().set({ updatedAt: ts, state: JSON.stringify(Y()) }).catch(()=> updatePill('off'));
 }
 function subscribeYear(){
   if (App.unsub){ App.unsub(); App.unsub = null; }
-  if (App.isLocal || !App.user || App.user.uid === 'local' || !FIREBASE_CONFIG.apiKey){ updatePill(); return; }
+  if (App.isLocal || !App.user || App.user.uid === 'local' || !.apiKey){ updatePill(); return; }
   App.unsub = fbRef().on('value', snap => {
     const d = snap.val();
     if (!d || !d.state) return;
@@ -657,11 +657,9 @@ async function pushAll(){
   saveLocal();
 }
 window.addEventListener('online', () => {
-  if (!App.isLocal && App.user && App.user.uid !== 'local' && FIREBASE_CONFIG.apiKey) fbWrite();
+  if (!App.isLocal && App.user && App.user.uid !== 'local' && .apiKey) fbWrite();
 });
-}
-  saveLocal();
-}
+
 const course = () => Y().courses.find(c => c.id === App.courseId) || null;
 const activeStudents = c => c.students.filter(s => s.active);
 function trimRange(t){
@@ -765,13 +763,13 @@ function authError(e){
 
 /* ═══════════ AUTENTICACIÓN ═══════════ */
 function initAuth(){
-  if (!FIREBASE_CONFIG.apiKey){
+  if (!.apiKey){
     App.isLocal = true;
     App.user = { uid:'local', email:'Modo local (sin sincronización)' };
     afterAuth();
     return;
   }
-  firebase.initializeApp(FIREBASE_CONFIG);
+  firebase.initializeApp();
   
   firebase.auth().onAuthStateChanged(u => {
     if (u){ App.user = { uid:u.uid, email:u.email }; afterAuth(); }
@@ -802,7 +800,7 @@ async function afterAuth(){
   $('appScreen').classList.remove('hidden');
   $('accEmail').textContent = App.user.email;
   $('accMode').textContent = App.isLocal
-    ? 'Modo local: los datos se guardan solo en este dispositivo. Completá FIREBASE_CONFIG para sincronizar entre dispositivos.'
+    ? 'Modo local: los datos se guardan solo en este dispositivo. Completá  para sincronizar entre dispositivos.'
     : 'Cuenta con sincronización en la nube entre dispositivos.';
   App.year = App.DB.globalYear || new Date().getFullYear();
   if (!App.isLocal){
