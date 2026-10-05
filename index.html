@@ -524,11 +524,9 @@ tr.off td{opacity:.55}
 
 <script>
 /* ══════════════════════════════════════════════════════════
-   CONFIGURACIÓN FIREBASE (opcional)
-   Pegá acá tu firebaseConfig para activar login + nube.
-   Vacío = modo local (sin login, guarda en el dispositivo).
+   CONFIGURACIÓN FIREBASE — YA INTEGRADA (Realtime Database)
 ══════════════════════════════════════════════════════════ */
-const  = {
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCpz2oKbLJ1OawOgQqUEmSzxiPzbWRCOhY",
   authDomain: "seguimiento-docente-eckerdt.firebaseapp.com",
   databaseURL: "https://seguimiento-docente-eckerdt-default-rtdb.firebaseio.com",
@@ -537,6 +535,7 @@ const  = {
   messagingSenderId: "227746098622",
   appId: "1:227746098622:web:30f9be32bfa2efdd579def"
 };
+
 /* ═══════════ NÚCLEO ═══════════ */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -551,7 +550,6 @@ const VAL = { P:1, A:0, T:1, R:0.5 };
 const LS_KEY = 'ssd_app_v5';
 const TEACHER_ABSENCE = 'Ausencia Docente';
 
-/* Fallback: si el entorno bloquea localStorage (p. ej. sandbox de un preview), usa memoria */
 const CAN_STORE = (() => {
   try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; }
   catch(e){ return false; }
@@ -608,17 +606,18 @@ function updatePill(state){
   else if (App.isLocal || !App.user || App.user.uid === 'local'){ p.className='pill'; p.textContent='📴 Local'; }
   else { p.className='pill ok'; p.textContent='☁️ Sincronizado'; }
 }
+
 /* ---------- Sincronización Realtime Database ---------- */
 function fbRef(){ return firebase.database().ref('users/' + App.user.uid + '/years/' + App.year); }
 function fbWrite(){
-  if (App.isLocal || !App.user || App.user.uid === 'local' || !.apiKey) return;
+  if (App.isLocal || !App.user || App.user.uid === 'local' || !FIREBASE_CONFIG.apiKey) return;
   const ts = Date.now();
   App.fbMine = ts; UB().stamps[App.year] = ts; saveLocal();
   fbRef().set({ updatedAt: ts, state: JSON.stringify(Y()) }).catch(()=> updatePill('off'));
 }
 function subscribeYear(){
   if (App.unsub){ App.unsub(); App.unsub = null; }
-  if (App.isLocal || !App.user || App.user.uid === 'local' || !.apiKey){ updatePill(); return; }
+  if (App.isLocal || !App.user || App.user.uid === 'local' || !FIREBASE_CONFIG.apiKey){ updatePill(); return; }
   App.unsub = fbRef().on('value', snap => {
     const d = snap.val();
     if (!d || !d.state) return;
@@ -657,7 +656,7 @@ async function pushAll(){
   saveLocal();
 }
 window.addEventListener('online', () => {
-  if (!App.isLocal && App.user && App.user.uid !== 'local' && .apiKey) fbWrite();
+  if (!App.isLocal && App.user && App.user.uid !== 'local' && FIREBASE_CONFIG.apiKey) fbWrite();
 });
 
 const course = () => Y().courses.find(c => c.id === App.courseId) || null;
@@ -763,14 +762,7 @@ function authError(e){
 
 /* ═══════════ AUTENTICACIÓN ═══════════ */
 function initAuth(){
-  if (!.apiKey){
-    App.isLocal = true;
-    App.user = { uid:'local', email:'Modo local (sin sincronización)' };
-    afterAuth();
-    return;
-  }
-  firebase.initializeApp();
-  
+  firebase.initializeApp(FIREBASE_CONFIG);
   firebase.auth().onAuthStateChanged(u => {
     if (u){ App.user = { uid:u.uid, email:u.email }; afterAuth(); }
     else { $('authScreen').classList.remove('hidden'); $('appScreen').classList.add('hidden'); }
@@ -788,10 +780,6 @@ async function doRegister(e){
 }
 function showAuthMsg(m){ const el = $('authMsg'); el.textContent = '⚠️ ' + m; el.classList.remove('hidden'); }
 function doLogout(){
-  if (App.isLocal){
-    if (!confirm('En modo local no hay sesión. ¿Recargar la aplicación?')) return;
-    location.reload(); return;
-  }
   if (confirm('¿Cerrar sesión? Tus datos quedan guardados y sincronizados.'))
     firebase.auth().signOut().then(() => location.reload());
 }
@@ -799,16 +787,12 @@ async function afterAuth(){
   $('authScreen').classList.add('hidden');
   $('appScreen').classList.remove('hidden');
   $('accEmail').textContent = App.user.email;
-  $('accMode').textContent = App.isLocal
-    ? 'Modo local: los datos se guardan solo en este dispositivo. Completá  para sincronizar entre dispositivos.'
-    : 'Cuenta con sincronización en la nube entre dispositivos.';
+  $('accMode').textContent = 'Cuenta con sincronización en la nube entre dispositivos.';
   App.year = App.DB.globalYear || new Date().getFullYear();
-  if (!App.isLocal){
-    try {
-      await pullAll();
-      await migrateLocalIfNeeded();
-    } catch(e){ updatePill('off'); }
-  }
+  try {
+    await pullAll();
+    await migrateLocalIfNeeded();
+  } catch(e){ updatePill('off'); }
   applyTheme(App.DB.theme || 'light');
   fillYears(); renderAll(); subscribeYear();
 }
@@ -820,7 +804,7 @@ async function migrateLocalIfNeeded(){
     b.years = loc.years;
     b.stamps = Object.assign({}, loc.stamps);
     saveLocal();
-    await pushAll();
+    try { await pushAll(); } catch(e){}
     toast('Datos locales migrados a tu cuenta ✓');
   }
 }
@@ -1444,8 +1428,7 @@ function restoreFile(ev){
       App.year = App.DB.globalYear;
       App.courseId = null;
       save();
-      if (!App.isLocal) pushAll().then(() => toast('Respaldo restaurado y subido a la nube ✓')).catch(() => toast('Respaldo restaurado (sin conexión a la nube)','warn'));
-      else toast('Respaldo restaurado ✓');
+      pushAll().then(() => toast('Respaldo restaurado y subido a la nube ✓')).catch(() => toast('Respaldo restaurado (sin conexión a la nube)','warn'));
       fillYears(); renderAll(); subscribeYear();
     } catch(e){ toast('Archivo de respaldo inválido','err'); }
   };
